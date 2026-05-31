@@ -1,0 +1,37 @@
+name: KeepCode AI IDE Derleme Robotu
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Kodları Çek
+        uses: actions/checkout@v4
+
+      - name: Node.js Kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18 # VS Code altyapısı kararlı çalışması için v18 idealdir
+          cache: 'npm'
+
+      - name: Yarn ve Gulp Kur
+        run: |
+          npm install -g yarn
+          npm install -g gulp-cli
+
+      # 1. Aşama: VS Code'un tüm ağır bağımlılıklarını yükle
+      - name: Bağımlılıkları Yükle
+        run: yarn install
+
+      # 2. Aşama: Windows x64 için optimize edilmiş derlemeyi başlat
+      - name: VS Code Paketini Derle
+        run: npx gulp vscode-win32-x64-min
+
+      # 3. Aşama: out-vscode-min klasörünü zipleyip indirme linki yap
+      - name: Derlenen Klasörü Paketle
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeepCode-AI-Windows-x64
+          path: out-vscode-min/
