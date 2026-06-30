@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Kodları Çek
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Node.js Kur
         uses: actions/setup-node@v4
