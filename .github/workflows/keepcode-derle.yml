@@ -39,9 +39,9 @@ jobs:
       - name: VS Code Paketini Derle
         run: npx gulp vscode-win32-x64-min
 
-      # 3. Aşama: out-vscode-min klasörünü zipleyip indirme linki yap
+      # 3. Aşama: VSCode-win32-x64 klasörünü zipleyip indirme linki yap
       - name: Derlenen Klasörü Paketle
         uses: actions/upload-artifact@v4
         with:
           name: KeepCode-AI-Windows-x64
-          path: out-vscode-min/
+          path: ../VSCode-win32-x64/
