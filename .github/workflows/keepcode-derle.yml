@@ -18,20 +18,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.22.1
-          cache: 'yarn'
+          cache: 'npm'
 
       - name: Antivirus Korumasini Kapat (Hizlandirma)
         run: Set-MpPreference -DisableRealtimeMonitoring $true
         shell: powershell
+        continue-on-error: true
 
-      - name: Yarn ve Gulp Kur
-        run: |
-          npm install -g yarn
-          npm install -g gulp-cli
+      - name: Gulp Kur
+        run: npm install -g gulp-cli
 
       # 1. Asama: VS Code'un tum agir bagimliliklarini yukle
-      - name: Bagimliliklari Yukle
-        run: yarn install --frozen-lockfile --network-timeout 180000
+      - name: Bağımlılıkları Yükle
+        run: npm ci
 
       # 2. Aşama: Windows x64 için optimize edilmiş derlemeyi başlat
       - name: VS Code Paketini Derle
