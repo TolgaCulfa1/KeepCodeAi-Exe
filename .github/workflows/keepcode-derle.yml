@@ -1,4 +1,4 @@
-name: KeepCode AI IDE Derleme Robotu
+name: KeepCode AI IDE Setup Derleme Robotu
 
 on:
   push:
@@ -32,46 +32,26 @@ jobs:
       - name: Gulp Kur
         run: npm install -g gulp-cli
 
-      # 1. Asama: VS Code'un tum agir bagimliliklarini yukle
       - name: Bağımlılıkları Yükle
         run: npm ci
 
-      # 2. Aşama: Windows x64 için optimize edilmiş derlemeyi başlat
       - name: VS Code Paketini Derle
         run: npx gulp vscode-win32-x64-min
 
-      # 3. Aşama: Windows Setup Wizard (Kurulum Exesi) Derle
-      - name: Kurulum Sihirbazını Derle
+      - name: Sadece Kurulum Sihirbazını Derle (Setup EXE)
         run: npx gulp vscode-win32-x64-user-setup
 
-      # 4. Aşama: VSCode-win32-x64 klasörünü workspace içine taşı
-      - name: Derlenen Klasörü Taşı
-        run: Move-Item -Path ../VSCode-win32-x64 -Destination ./VSCode-win32-x64
-        shell: powershell
-
-      # 5. Aşama: Taşınabilir (Portable) Sürümü Paketle
-      - name: Taşınabilir Sürümü Paketle (ZIP)
-        uses: actions/upload-artifact@v4
-        with:
-          name: KeepCode-AI-Windows-x64-Portable
-          path: VSCode-win32-x64/
-
-      # 6. Aşama: Kurulum Sihirbazı (Setup Installer) Paketle
-      - name: Kurulum Sihirbazını Paketle (EXE)
+      - name: Kurulum Sihirbazını GitHub Actions'a Yükle (Garanti İndirme Linki)
         uses: actions/upload-artifact@v4
         with:
           name: KeepCode-AI-Windows-x64-Installer
-          path: .build/win32-x64/user-setup/
+          path: .build/win32-x64/user-setup/*.exe
 
-      # 7. Aşama: Auto Updater için GitHub Release Oluştur
-      - name: GitHub Release (Latest) Güncelle
+      - name: GitHub Release'e Ekle (Otomatik Güncelleyici İçin)
         uses: softprops/action-gh-release@v2
+        continue-on-error: true # İzin hatası verirse durmasın, üstteki adımdan indirilebilsin
         with:
           name: KeepCode AI Güncel Sürüm
           tag_name: latest
-          files: |
-            .build/win32-x64/user-setup/*.exe
-            VSCode-win32-x64/*.zip
+          files: .build/win32-x64/user-setup/*.exe
           make_latest: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
