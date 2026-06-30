@@ -1056,62 +1056,8 @@ export class ChatEntitlementRequests extends Disposable {
 	}
 
 	private async doSignUpFree(sessions: AuthenticationSession[]): Promise<true /* signed up */ | false /* already signed up */ | { errorCode: number } /* error */> {
-		const body = {
-			restricted_telemetry: this.telemetryService.telemetryLevel === TelemetryLevel.NONE ? 'disabled' : 'enabled',
-			public_code_suggestions: 'enabled'
-		};
-
-		const response = await this.request(defaultChatAgent.entitlementSignupLimitedUrl, 'POST', body, sessions, CancellationToken.None, 'chatEntitlementService.signUpFree');
-		if (!response) {
-			const retry = await this.onUnknownSignUpError(localize('signUpNoResponseError', "No response received."), '[chat entitlement] sign-up: no response');
-			return retry ? this.doSignUpFree(sessions) : { errorCode: 1 };
-		}
-
-		if (response.res.statusCode && response.res.statusCode !== 200) {
-			if (response.res.statusCode === 422) {
-				try {
-					const responseText = await asText(response);
-					if (responseText) {
-						const responseError: { message: string } = JSON.parse(responseText);
-						if (typeof responseError.message === 'string' && responseError.message) {
-							this.onUnprocessableSignUpError(`[chat entitlement] sign-up: unprocessable entity (${responseError.message})`, responseError.message);
-							return { errorCode: response.res.statusCode };
-						}
-					}
-				} catch (error) {
-					// ignore - handled below
-				}
-			}
-			const retry = await this.onUnknownSignUpError(localize('signUpUnexpectedStatusError', "Unexpected status code {0}.", response.res.statusCode), `[chat entitlement] sign-up: unexpected status code ${response.res.statusCode}`);
-			return retry ? this.doSignUpFree(sessions) : { errorCode: response.res.statusCode };
-		}
-
-		let responseText: string | null = null;
-		try {
-			responseText = await asText(response);
-		} catch (error) {
-			// ignore - handled below
-		}
-
-		if (!responseText) {
-			const retry = await this.onUnknownSignUpError(localize('signUpNoResponseContentsError', "Response has no contents."), '[chat entitlement] sign-up: response has no content');
-			return retry ? this.doSignUpFree(sessions) : { errorCode: 2 };
-		}
-
-		let parsedResult: { subscribed: boolean } | undefined = undefined;
-		try {
-			parsedResult = JSON.parse(responseText);
-			this.logService.trace(`[chat entitlement] sign-up: response is ${responseText}`);
-		} catch (err) {
-			const retry = await this.onUnknownSignUpError(localize('signUpInvalidResponseError', "Invalid response contents."), `[chat entitlement] sign-up: error parsing response (${err})`);
-			return retry ? this.doSignUpFree(sessions) : { errorCode: 3 };
-		}
-
-		// We have made it this far, so the user either did sign-up or was signed-up already.
-		// That is, because the endpoint throws in all other case according to Patrick.
 		this.update({ entitlement: ChatEntitlement.Free });
-
-		return Boolean(parsedResult?.subscribed);
+		return true;
 	}
 
 	private async getSessions(): Promise<AuthenticationSession[]> {
