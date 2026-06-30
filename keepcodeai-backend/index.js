@@ -211,7 +211,7 @@ app.post('/api/chat/completions', authenticateToken, async (req, res) => {
 });
 
 // --- AUTO UPDATER API ---
-app.get('/api/update/:platform/:quality/:commit', (req, res) => {
+app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:platform/:quality/:commit'], (req, res) => {
     const { platform, quality, commit } = req.params;
     console.log(`Update check from platform: ${platform}, quality: ${quality}, commit: ${commit}`);
     
