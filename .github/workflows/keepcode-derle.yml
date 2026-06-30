@@ -17,7 +17,7 @@ jobs:
       - name: Node.js Kur
         uses: actions/setup-node@v4
         with:
-          node-version: 18 # VS Code altyapısı kararlı çalışması için v18 idealdir
+          node-version: 22.22.1 # .nvmrc ile eşleşmelidir
           cache: 'npm'
 
       - name: Yarn ve Gulp Kur
