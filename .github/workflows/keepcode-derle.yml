@@ -12,6 +12,7 @@ jobs:
 
     env:
       VSCODE_SKIP_NODE_VERSION_CHECK: 'true'
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Kodları Çek
