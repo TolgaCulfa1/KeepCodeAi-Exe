@@ -17,17 +17,21 @@ jobs:
       - name: Node.js Kur
         uses: actions/setup-node@v4
         with:
-          node-version: 22.22.1 # .nvmrc ile eşleşmelidir
-          cache: 'npm'
+          node-version: 22.22.1
+          cache: 'yarn'
+
+      - name: Antivirus Korumasini Kapat (Hizlandirma)
+        run: Set-MpPreference -DisableRealtimeMonitoring $true
+        shell: powershell
 
       - name: Yarn ve Gulp Kur
         run: |
           npm install -g yarn
           npm install -g gulp-cli
 
-      # 1. Aşama: VS Code'un tüm ağır bağımlılıklarını yükle
-      - name: Bağımlılıkları Yükle
-        run: yarn install
+      # 1. Asama: VS Code'un tum agir bagimliliklarini yukle
+      - name: Bagimliliklari Yukle
+        run: yarn install --frozen-lockfile --network-timeout 180000
 
       # 2. Aşama: Windows x64 için optimize edilmiş derlemeyi başlat
       - name: VS Code Paketini Derle
