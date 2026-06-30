@@ -210,8 +210,18 @@ app.post('/api/chat/completions', authenticateToken, async (req, res) => {
     }
 });
 
+// --- AUTO UPDATER API ---
+app.get('/api/update/:platform/:quality/:commit', (req, res) => {
+    const { platform, quality, commit } = req.params;
+    console.log(`Update check from platform: ${platform}, quality: ${quality}, commit: ${commit}`);
+    
+    // Default to 204 No Content (No updates available)
+    // If you release a new version, you can change this to return the update JSON.
+    res.status(204).end();
+});
+
 // SPA (Single Page Application) routing fallback: Serve index.html for all other routes
-app.get('*', (req, res) => {
+app.get('/{*splat}', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
