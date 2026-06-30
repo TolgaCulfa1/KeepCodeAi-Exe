@@ -42,7 +42,7 @@ jobs:
         run: npx gulp vscode-win32-x64-user-setup
 
       - name: Kurulum Sihirbazını GitHub Actions'a Yükle (Garanti İndirme Linki)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: KeepCode-AI-Windows-x64-Installer
           path: .build/win32-x64/user-setup/*.exe
