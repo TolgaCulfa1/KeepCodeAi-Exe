@@ -113,6 +113,10 @@
 			"default": {
 				"id": "github",
 				"name": "KeepCode AI"
+			},
+			"enterprise": {
+				"id": "github-enterprise",
+				"name": "KeepCode AI Enterprise"
 			}
 		},
 		"providerExtensionId": "vscode.github-authentication",
