@@ -41,7 +41,8 @@ export default function Register() {
 
     setLoading(true);
     try {
-      const res = await axios.post('/api/register', { email, password });
+      const username = email.split('@')[0];
+      const res = await axios.post('/api/register', { email, password, username });
       localStorage.setItem('token', res.data.token);
 
       if (ideToken) {
@@ -160,6 +161,15 @@ export default function Register() {
           </div>
         </div>
       </div>
+      
+      {/* Footer Nav Links */}
+      <footer className="w-full py-6 text-center text-xs text-zinc-500 relative z-10 flex justify-center flex-wrap gap-6 mt-2">
+        <button onClick={() => navigate('/docs')} className="hover:text-zinc-300 transition-colors font-medium">Belgeler (Docs)</button>
+        <button onClick={() => navigate('/pricing')} className="hover:text-zinc-300 transition-colors font-medium">Fiyatlandırma</button>
+        <button onClick={() => navigate('/terms')} className="hover:text-zinc-300 transition-colors font-medium">Kullanım Koşulları</button>
+        <button onClick={() => navigate('/privacy')} className="hover:text-zinc-300 transition-colors font-medium">Gizlilik Politikası</button>
+        <button onClick={() => navigate('/public-code')} className="hover:text-zinc-300 transition-colors font-medium">Açık Kaynak</button>
+      </footer>
     </>
   );
 }
