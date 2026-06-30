@@ -62,3 +62,16 @@ jobs:
         with:
           name: KeepCode-AI-Windows-x64-Installer
           path: .build/win32-x64/user-setup/
+
+      # 7. Aşama: Auto Updater için GitHub Release Oluştur
+      - name: GitHub Release (Latest) Güncelle
+        uses: softprops/action-gh-release@v2
+        with:
+          name: KeepCode AI Güncel Sürüm
+          tag_name: latest
+          files: |
+            .build/win32-x64/user-setup/*.exe
+            VSCode-win32-x64/*.zip
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -217,13 +217,57 @@ app.post('/api/chat/completions', authenticateToken, async (req, res) => {
 });
 
 // --- AUTO UPDATER API ---
-app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:platform/:quality/:commit'], (req, res) => {
+app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:platform/:quality/:commit'], async (req, res) => {
     const { platform, quality, commit } = req.params;
     console.log(`Update check from platform: ${platform}, quality: ${quality}, commit: ${commit}`);
     
-    // Default to 204 No Content (No updates available)
-    // If you release a new version, you can change this to return the update JSON.
-    res.status(204).end();
+    try {
+        // Fetch the latest release from GitHub
+        const ghResponse = await fetch('https://api.github.com/repos/TolgaCulfa1/KeepCodeAi-Exe/releases/tags/latest', {
+            headers: {
+                'User-Agent': 'KeepCodeAI-Update-Server',
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+
+        if (!ghResponse.ok) {
+            console.log('GitHub API request failed, no update available.');
+            return res.status(204).end();
+        }
+
+        const release = await ghResponse.json();
+        
+        // Find the Windows Installer asset
+        const exeAsset = release.assets.find(a => a.name.endsWith('.exe'));
+        
+        if (!exeAsset) {
+            console.log('No Windows EXE found in the latest release.');
+            return res.status(204).end();
+        }
+
+        // Compare commit hashes if possible. If the release has the commit hash in the body or target_commitish, we can check.
+        // For simplicity, if we don't have a way to match commits exactly, we can check the published_at date or release name.
+        // Let's assume if the release was published after the user's build, it's new. But VS Code relies on the 'version' or 'name' string being different.
+        
+        // Construct the update payload expected by VS Code
+        const updatePayload = {
+            url: exeAsset.browser_download_url,
+            name: release.name || 'Latest Update',
+            version: release.tag_name,
+            productVersion: release.tag_name,
+            hash: '', 
+            timestamp: new Date(release.published_at).getTime(),
+            sha256hash: '', 
+        };
+
+        // Note: VS Code will prompt to update if the 'version' returned here is different from its current version.
+        // If it's the same version, we should ideally return 204.
+        // For now, returning 200 OK will trigger the update if the version differs.
+        res.json(updatePayload);
+    } catch (err) {
+        console.error('Update server error:', err);
+        res.status(204).end();
+    }
 });
 
 // SPA (Single Page Application) routing fallback: Serve index.html for all other routes

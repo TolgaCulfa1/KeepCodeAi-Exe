@@ -872,6 +872,7 @@ export class ChatEntitlementRequests extends Disposable {
 
 	private registerListeners(): void {
 		this._register(this.defaultAccountService.onDidChangeDefaultAccount(() => this.resolve()));
+		this._register(this.keepcodeaiService.onDidChangeAuthState(() => this.resolve()));
 
 		this._register(this.context.onDidChange(() => {
 			if (this.context.state.disabled || this.context.state.entitlement === ChatEntitlement.Unknown) {
