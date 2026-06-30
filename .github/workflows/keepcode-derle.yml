@@ -33,8 +33,8 @@ jobs:
           $msbuild = (Get-ChildItem -Path "C:\Program Files\Microsoft Visual Studio" -Filter MSBuild.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
           if ($msbuild) {
             Write-Host "MSBuild Bulundu: $msbuild"
-            npm config set msbuild_path "$msbuild"
             echo "npm_config_msbuild_path=$msbuild" >> $env:GITHUB_ENV
+            echo "MSBUILD_PATH=$msbuild" >> $env:GITHUB_ENV
           } else {
             Write-Error "MSBuild.exe bulunamadi!"
           }
