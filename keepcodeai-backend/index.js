@@ -147,7 +147,13 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
         if (err || !user) {
             return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
         }
-        res.json(user);
+        // IDE expects api_calls and api_limit for canUseAI() check
+        const planLimits = { free: 50, pro: 5000, premium: 50000 };
+        res.json({
+            ...user,
+            api_calls: 0,
+            api_limit: planLimits[user.plan] || 50
+        });
     });
 });
 

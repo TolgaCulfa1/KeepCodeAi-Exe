@@ -39,7 +39,8 @@ export default function Login() {
       if (ideToken) {
         navigate(`/auth/dogrulandi?TOKEN=${ideToken}`);
       } else {
-        navigate('/dashboard');
+        // Show the token so user can copy it to IDE
+        setToken(res.data.token);
       }
     } catch (err) {
       const msg = err.response?.data?.error || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.';
@@ -127,8 +128,17 @@ export default function Login() {
 
                 <button
                   className="btn-primary"
+                  onClick={() => navigate('/dashboard')}
+                  style={{ marginTop: '1rem', background: '#3b82f6' }}
+                >
+                  <span>Dashboard'a Git</span>
+                  <ArrowRight />
+                </button>
+
+                <button
+                  className="btn-primary"
                   onClick={() => { setToken(null); setEmail(''); setPassword(''); }}
-                  style={{ marginTop: '1rem' }}
+                  style={{ marginTop: '0.5rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)' }}
                 >
                   <span>Farklı Hesapla Giriş Yap</span>
                 </button>

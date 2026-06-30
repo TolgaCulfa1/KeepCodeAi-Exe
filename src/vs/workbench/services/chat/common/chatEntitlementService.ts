@@ -859,6 +859,7 @@ export class ChatEntitlementRequests extends Disposable {
 		@ILifecycleService private readonly lifecycleService: ILifecycleService,
 		@IDefaultAccountService private readonly defaultAccountService: IDefaultAccountService,
 		@IAuthenticationService private readonly authenticationService: IAuthenticationService,
+		@IKeepCodeAIService private readonly keepcodeaiService: IKeepCodeAIService,
 	) {
 		super();
 
@@ -885,6 +886,22 @@ export class ChatEntitlementRequests extends Disposable {
 	private async resolve(): Promise<void> {
 		this.pendingResolveCts.dispose(true);
 		const cts = this.pendingResolveCts = new CancellationTokenSource();
+
+		// KeepCode AI: If user is authenticated via KeepCode token, resolve directly
+		if (this.keepcodeaiService.isAuthenticated()) {
+			const user = this.keepcodeaiService.getUser();
+			if (user) {
+				let entitlement = ChatEntitlement.Free;
+				if (user.plan === 'Pro') {
+					entitlement = ChatEntitlement.Pro;
+				} else if (user.plan === 'Enterprise') {
+					entitlement = ChatEntitlement.Enterprise;
+				}
+				this.update({ entitlement });
+				this.logService.trace(`[chat entitlement]: KeepCode AI user resolved to ${entitlement}`);
+				return;
+			}
+		}
 
 		const defaultAccount = await this.defaultAccountService.getDefaultAccount();
 		if (cts.token.isCancellationRequested) {
@@ -1417,32 +1434,33 @@ export class ChatEntitlementContext extends Disposable {
 			}
 		}
 
+		// Use the computed 'entitlement' (which reflects KeepCode auth) for ALL context keys
 		this.signedOutContextKey.set(entitlement === ChatEntitlement.Unknown);
-		this.canSignUpContextKey.set(state.entitlement === ChatEntitlement.Available);
+		this.canSignUpContextKey.set(entitlement === ChatEntitlement.Available);
 
-		this.freeContextKey.set(state.entitlement === ChatEntitlement.Free);
-		this.eduContextKey.set(state.entitlement === ChatEntitlement.EDU);
-		this.proContextKey.set(state.entitlement === ChatEntitlement.Pro);
-		this.proPlusContextKey.set(state.entitlement === ChatEntitlement.ProPlus);
-		this.maxContextKey.set(state.entitlement === ChatEntitlement.Max);
-		this.businessContextKey.set(state.entitlement === ChatEntitlement.Business);
-		this.enterpriseContextKey.set(state.entitlement === ChatEntitlement.Enterprise);
+		this.freeContextKey.set(entitlement === ChatEntitlement.Free);
+		this.eduContextKey.set(entitlement === ChatEntitlement.EDU);
+		this.proContextKey.set(entitlement === ChatEntitlement.Pro);
+		this.proPlusContextKey.set(entitlement === ChatEntitlement.ProPlus);
+		this.maxContextKey.set(entitlement === ChatEntitlement.Max);
+		this.businessContextKey.set(entitlement === ChatEntitlement.Business);
+		this.enterpriseContextKey.set(entitlement === ChatEntitlement.Enterprise);
 
 		this.organisationsContextKey.set(state.organisations);
 		this.isInternalContextKey.set(Boolean(state.organisations?.some(org => org === 'github' || org === 'microsoft' || org === 'ms-copilot' || org === 'MicrosoftCopilot')));
 		this.skuContextKey.set(state.sku);
 
-		this.completedContext.set(!!state.completed);
+		this.completedContext.set(!!state.completed || isKeepCodeAuthenticated);
 		this.hiddenContext.set(!!state.hidden);
 		this.disabledInWorkspaceContext.set(!!state.disabledInWorkspace);
 		this.laterContext.set(!!state.later);
-		this.installedContext.set(!!state.installed);
+		this.installedContext.set(!!state.installed || isKeepCodeAuthenticated);
 		this.disabledContext.set(!!state.disabled);
 		this.untrustedContext.set(!!state.untrusted);
-		this.registeredContext.set(!!state.registered);
+		this.registeredContext.set(!!state.registered || isKeepCodeAuthenticated);
 
-		this.logService.trace(`[chat entitlement context] updateContext(): ${JSON.stringify(state)}`);
-		logChatEntitlements(state, this.configurationService, this.telemetryService);
+		this.logService.trace(`[chat entitlement context] updateContext(): ${JSON.stringify(state)}, keepcodeAuth: ${isKeepCodeAuthenticated}, resolvedEntitlement: ${entitlement}`);
+		logChatEntitlements({ ...state, entitlement }, this.configurationService, this.telemetryService);
 
 		this._onDidChange.fire();
 	}
