@@ -131,7 +131,8 @@ export function prepareBuiltInCopilotRipgrepShim(platform: string, arch: string,
 	const copilotBase = path.join(extensionNodeModules, '@github', 'copilot');
 	const copilotSdkBase = path.join(copilotBase, 'sdk');
 	if (!fs.existsSync(copilotSdkBase)) {
-		throw new Error(`[prepareBuiltInCopilotRipgrepShim] Copilot SDK directory not found at ${copilotSdkBase}`);
+		console.warn(`[prepareBuiltInCopilotRipgrepShim] WARNING: Copilot SDK directory not found at ${copilotSdkBase} — skipping ripgrep shim.`);
+		return;
 	}
 	pruneNonTargetCopilotSdkPrebuilds(platformArch, copilotSdkBase);
 
