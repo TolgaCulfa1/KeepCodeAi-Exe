@@ -44,6 +44,7 @@ import { KeyCode } from '../../../base/common/keyCodes.js';
 import { ACTIVITY_BAR_BADGE_BACKGROUND, ACTIVITY_BAR_BADGE_FOREGROUND } from '../../common/theme.js';
 import { IBaseActionViewItemOptions } from '../../../base/browser/ui/actionbar/actionViewItems.js';
 import { ICommandService } from '../../../platform/commands/common/commands.js';
+import { IKeepCodeAIService } from '../../services/keepcodeai/common/keepcodeaiService.js';
 
 export class GlobalCompositeBar extends Disposable {
 
@@ -285,7 +286,8 @@ export class AccountsActivityActionViewItem extends AbstractGlobalActivityAction
 		@ILogService private readonly logService: ILogService,
 		@IActivityService activityService: IActivityService,
 		@IInstantiationService instantiationService: IInstantiationService,
-		@ICommandService private readonly commandService: ICommandService
+		@ICommandService private readonly commandService: ICommandService,
+		@IKeepCodeAIService private readonly keepcodeaiService: IKeepCodeAIService
 	) {
 		const action = instantiationService.createInstance(CompositeBarAction, {
 			id: ACCOUNTS_ACTIVITY_ID,
@@ -358,7 +360,7 @@ export class AccountsActivityActionViewItem extends AbstractGlobalActivityAction
 	protected override async resolveMainMenuActions(accountsMenu: IMenu, disposables: DisposableStore): Promise<IAction[]> {
 		await super.resolveMainMenuActions(accountsMenu, disposables);
 
-		const providers = this.authenticationService.getProviderIds().filter(p => !p.startsWith(INTERNAL_AUTH_PROVIDER_PREFIX));
+		const providers = this.authenticationService.getProviderIds().filter(p => !p.startsWith(INTERNAL_AUTH_PROVIDER_PREFIX) && p !== 'github');
 		const otherCommands = accountsMenu.getActions();
 		let menus: IAction[] = [];
 
@@ -369,6 +371,24 @@ export class AccountsActivityActionViewItem extends AbstractGlobalActivityAction
 			const noAccountsAvailableAction = disposables.add(new Action('noAccountsAvailable', localize('loading', "Loading..."), undefined, false));
 			menus.push(noAccountsAvailableAction);
 		} else {
+			if (this.keepcodeaiService.isAuthenticated()) {
+				const user = this.keepcodeaiService.getUser();
+				if (user) {
+					const keepcodeSubMenuActions: IAction[] = [
+						toAction({
+							id: 'signOutKeepCode',
+							label: localize('signOutKeepCode', "Sign Out from KeepCode AI"),
+							enabled: true,
+							run: () => {
+								this.keepcodeaiService.signOut();
+							}
+						})
+					];
+					const keepcodeSubMenu = new SubmenuAction('activitybar.submenu.keepcode', `${user.username} (KeepCode AI)`, keepcodeSubMenuActions);
+					menus.push(keepcodeSubMenu);
+				}
+			}
+
 			for (const providerId of registeredProviders) {
 				const provider = this.authenticationService.getProvider(providerId);
 				const accounts = this.groupedAccounts.get(providerId);

@@ -233,8 +233,23 @@
 			"type": "light"
 		}
 	],
+	"defaultChatAgent": {
+		"extensionId": "KeepCode.copilot",
+		"chatExtensionId": "KeepCode.copilot-chat",
+		"provider": {
+			"default": {
+				"id": "keepcodeai",
+				"name": "KeepCode AI"
+			},
+			"enterprise": {
+				"id": "keepcodeai-enterprise",
+				"name": "KeepCode AI Enterprise"
+			}
+		},
+		"providerScopes": []
+	},
 	"builtInExtensionsEnabledWithAutoUpdates": [
-		"GitHub.copilot-chat"
+		"KeepCode.copilot-chat"
 	],
 	"sessionsWindowAllowedExtensions": []
 }

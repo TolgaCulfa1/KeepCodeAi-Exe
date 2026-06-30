@@ -72,16 +72,16 @@ else {
 			licenseUrl: 'https://github.com/microsoft/vscode/blob/main/LICENSE.txt',
 			serverLicenseUrl: 'https://github.com/microsoft/vscode/blob/main/LICENSE.txt',
 			defaultChatAgent: {
-				extensionId: 'GitHub.copilot',
-				chatExtensionId: 'GitHub.copilot-chat',
+				extensionId: 'KeepCode.copilot',
+				chatExtensionId: 'KeepCode.copilot-chat',
 				provider: {
 					default: {
-						id: 'github',
-						name: 'GitHub',
+						id: 'keepcodeai',
+						name: 'KeepCode AI',
 					},
 					enterprise: {
-						id: 'github-enterprise',
-						name: 'GitHub Enterprise',
+						id: 'keepcodeai-enterprise',
+						name: 'KeepCode AI Enterprise',
 					}
 				},
 				providerScopes: []

@@ -32,6 +32,8 @@ import { InstantiationType, registerSingleton } from '../../../../platform/insta
 import { IObservable, observableFromEvent } from '../../../../base/common/observable.js';
 import { IDefaultAccountService } from '../../../../platform/defaultAccount/common/defaultAccount.js';
 import { IDefaultAccount, IEntitlementsData } from '../../../../base/common/defaultAccount.js';
+import { IKeepCodeAIService } from '../../keepcodeai/common/keepcodeaiService.js';
+import { IQuickInputService } from '../../../../platform/quickinput/common/quickInput.js';
 
 export namespace ChatEntitlementContextKeys {
 
@@ -350,6 +352,8 @@ export class ChatEntitlementService extends Disposable implements IChatEntitleme
 		@ITelemetryService private readonly telemetryService: ITelemetryService,
 		@ILogService private readonly logService: ILogService,
 		@IStorageService private readonly storageService: IStorageService,
+		@IQuickInputService private readonly quickInputService: IQuickInputService,
+		@IKeepCodeAIService private readonly keepcodeaiService: IKeepCodeAIService
 	) {
 		super();
 
@@ -1112,17 +1116,60 @@ export class ChatEntitlementRequests extends Disposable {
 	}
 
 	async signIn(options?: { useSocialProvider?: string; additionalScopes?: readonly string[] }): Promise<{ defaultAccount?: IDefaultAccount; entitlements?: IEntitlements }> {
-		const defaultAccount = await this.defaultAccountService.signIn({
-			additionalScopes: options?.additionalScopes,
-			extraAuthorizeParameters: { get_started_with: 'copilot-vscode' },
-			provider: options?.useSocialProvider
-		});
-		if (!defaultAccount) {
-			return {};
+		if (!this.keepcodeaiService.isAuthenticated()) {
+			const token = await this.quickInputService.input({
+				prompt: localize('enterKeepCodeToken', "Lütfen KeepCode AI Token'ınızı girin:"),
+				placeHolder: "kc_live_...",
+				ignoreFocusLost: true,
+				validateInput: async (val) => {
+					if (!val) return 'Token boş olamaz.';
+					return undefined;
+				}
+			});
+			if (token) {
+				try {
+					await this.keepcodeaiService.signIn(token);
+					await this.configurationService.updateValue('keepcodeai.token', token);
+					const user = this.keepcodeaiService.getUser();
+					await this.configurationService.updateValue('keepcodeai.user', user);
+				} catch (e) {
+					return {};
+				}
+			} else {
+				return {};
+			}
 		}
 
-		const entitlements = await this.doResolveEntitlement(defaultAccount, CancellationToken.None);
-		return { defaultAccount, entitlements };
+		const user = this.keepcodeaiService.getUser();
+		if (user) {
+			const mockAccount: IDefaultAccount = {
+				authenticationProvider: {
+					id: 'keepcodeai',
+					name: 'KeepCode AI',
+					enterprise: false
+				},
+				accountName: user.username,
+				sessionId: 'keepcode-session-id',
+				enterprise: false,
+				entitlementsData: {
+					chat_enabled: true
+				}
+			};
+			let entitlement = ChatEntitlement.Free;
+			if (user.plan === 'Pro') {
+				entitlement = ChatEntitlement.Pro;
+			} else if (user.plan === 'Enterprise') {
+				entitlement = ChatEntitlement.Enterprise;
+			}
+			return {
+				defaultAccount: mockAccount,
+				entitlements: {
+					entitlement
+				}
+			};
+		}
+
+		return {};
 	}
 
 	override dispose(): void {
@@ -1204,7 +1251,8 @@ export class ChatEntitlementContext extends Disposable {
 		@IStorageService private readonly storageService: IStorageService,
 		@ILogService private readonly logService: ILogService,
 		@IConfigurationService private readonly configurationService: IConfigurationService,
-		@ITelemetryService private readonly telemetryService: ITelemetryService
+		@ITelemetryService private readonly telemetryService: ITelemetryService,
+		@IKeepCodeAIService private readonly keepcodeaiService: IKeepCodeAIService
 	) {
 		super();
 
@@ -1249,6 +1297,10 @@ export class ChatEntitlementContext extends Disposable {
 		}
 
 		this.updateContextSync();
+
+		this._register(this.keepcodeaiService.onDidChangeAuthState(() => {
+			this.updateContext();
+		}));
 
 		this.registerListeners();
 	}
@@ -1352,7 +1404,20 @@ export class ChatEntitlementContext extends Disposable {
 	private updateContextSync(): void {
 		const state = this.withConfiguration(this._state);
 
-		this.signedOutContextKey.set(state.entitlement === ChatEntitlement.Unknown);
+		const isKeepCodeAuthenticated = this.keepcodeaiService.isAuthenticated();
+		let entitlement = state.entitlement;
+		if (isKeepCodeAuthenticated) {
+			const user = this.keepcodeaiService.getUser();
+			if (user?.plan === 'Pro') {
+				entitlement = ChatEntitlement.Pro;
+			} else if (user?.plan === 'Enterprise') {
+				entitlement = ChatEntitlement.Enterprise;
+			} else {
+				entitlement = ChatEntitlement.Free;
+			}
+		}
+
+		this.signedOutContextKey.set(entitlement === ChatEntitlement.Unknown);
 		this.canSignUpContextKey.set(state.entitlement === ChatEntitlement.Available);
 
 		this.freeContextKey.set(state.entitlement === ChatEntitlement.Free);
