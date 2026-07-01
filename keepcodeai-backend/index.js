@@ -280,6 +280,7 @@ app.get('/api/v1/mcp_registry', authenticateToken, (req, res) => {
 
 // --- AUTO UPDATER API WITH GITHUB RELEASES CACHING ---
 let releaseCache = null;
+let latestTagSha = '';
 let lastCacheFetchTime = 0;
 const CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes cache
 
@@ -304,6 +305,19 @@ app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:plat
 
             if (ghResponse.ok) {
                 releaseCache = await ghResponse.json();
+                
+                // Fetch tag ref to get the exact commit hash
+                try {
+                    const refResponse = await fetch('https://api.github.com/repos/TolgaCulfa1/KeepCodeAi-Exe/git/ref/tags/latest', { headers });
+                    if (refResponse.ok) {
+                        const refData = await refResponse.json();
+                        latestTagSha = refData.object?.sha || '';
+                        console.log('Latest tag commit SHA fetched:', latestTagSha);
+                    }
+                } catch (refErr) {
+                    console.error('Error fetching tag ref:', refErr);
+                }
+
                 lastCacheFetchTime = now;
             } else {
                 console.warn('GitHub API request failed, status:', ghResponse.status);
@@ -313,6 +327,16 @@ app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:plat
         if (!releaseCache) {
             console.log('No release cache available, returning 204');
             return res.status(204).end();
+        }
+
+        // Prevent infinite update loop by checking if client's commit matches the latest release commit
+        if (latestTagSha && commit && commit !== 'latest-check') {
+            const cleanCommit = commit.toLowerCase().trim();
+            const cleanTagSha = latestTagSha.toLowerCase().trim();
+            if (cleanTagSha.startsWith(cleanCommit) || cleanCommit.startsWith(cleanTagSha)) {
+                console.log(`Client is already up-to-date (Commit: ${commit}, Latest: ${latestTagSha}). Returning 204 No Content.`);
+                return res.status(204).end();
+            }
         }
         
         // Find the Windows Installer asset
