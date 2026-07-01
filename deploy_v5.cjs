@@ -24,10 +24,17 @@ try {
     const backendPublic = path.join(__dirname, 'keepcodeai-backend', 'public');
 
     console.log("Frontend build dosyaları backend public dizinine taşınıyor...");
-    if (fs.existsSync(backendPublic)) {
-        fs.rmSync(backendPublic, { recursive: true, force: true });
+    try {
+        if (fs.existsSync(backendPublic)) {
+            fs.rmSync(backendPublic, { recursive: true, force: true });
+        }
+        fs.mkdirSync(backendPublic, { recursive: true });
+    } catch (e) {
+        console.warn("Public dizini temizlenirken hata oluştu (dosya kilitli olabilir), kopyalamaya devam ediliyor:", e.message);
+        if (!fs.existsSync(backendPublic)) {
+            fs.mkdirSync(backendPublic, { recursive: true });
+        }
     }
-    fs.mkdirSync(backendPublic, { recursive: true });
 
     // Node.js ile dizin kopyalama yardımcısı
     function copyFolderRecursiveSync(source, target) {

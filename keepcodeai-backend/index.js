@@ -339,7 +339,7 @@ app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:plat
 });
 
 // SPA (Single Page Application) routing fallback: Serve index.html for all other routes
-app.get('*', (req, res) => {
+app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
