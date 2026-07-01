@@ -344,7 +344,7 @@ export class ChatEntitlementService extends Disposable implements IChatEntitleme
 	readonly requests: Lazy<ChatEntitlementRequests> | undefined;
 
 	constructor(
-		@IInstantiationService instantiationService: IInstantiationService,
+		@IInstantiationService private readonly instantiationService: IInstantiationService,
 		@IProductService productService: IProductService,
 		@IWorkbenchEnvironmentService environmentService: IWorkbenchEnvironmentService,
 		@IContextKeyService private readonly contextKeyService: IContextKeyService,
@@ -352,7 +352,6 @@ export class ChatEntitlementService extends Disposable implements IChatEntitleme
 		@ITelemetryService private readonly telemetryService: ITelemetryService,
 		@ILogService private readonly logService: ILogService,
 		@IStorageService private readonly storageService: IStorageService,
-		@IQuickInputService private readonly quickInputService: IQuickInputService,
 		@IKeepCodeAIService private readonly keepcodeaiService: IKeepCodeAIService
 	) {
 		super();
@@ -1135,7 +1134,8 @@ export class ChatEntitlementRequests extends Disposable {
 
 	async signIn(options?: { useSocialProvider?: string; additionalScopes?: readonly string[] }): Promise<{ defaultAccount?: IDefaultAccount; entitlements?: IEntitlements }> {
 		if (!this.keepcodeaiService.isAuthenticated()) {
-			const token = await this.quickInputService.input({
+			const quickInputService = this.instantiationService.invokeFunction(accessor => accessor.get(IQuickInputService));
+			const token = await quickInputService.input({
 				prompt: localize('enterKeepCodeToken', "Lütfen KeepCode AI Token'ınızı girin:"),
 				placeHolder: "kc_live_...",
 				ignoreFocusLost: true,
