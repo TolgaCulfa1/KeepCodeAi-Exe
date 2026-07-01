@@ -6,19 +6,15 @@
   --primary: #ffffff;
   --primary-light: #ffffff;
   --primary-dark: #f4f4f5;
-  --accent: #71717a;
+  --accent: #a1a1aa;
   --success: #10b981;
   --error: #ef4444;
   --bg-dark: #09090b;
-  /* Saf siyah yerine derinlik hissi için hafif zinc tonlu koyu arka plan */
-  --bg-card: #141417;
-  /* Kart belirginliği için optimize edilmiş ton */
+  --bg-card: #121214;
   --bg-input: #09090b;
-  --border-subtle: #27272a;
-  /* Premium mikro kontrast için sınır rengi ayarlandı */
-  --border-focus: #52525b;
-  /* Dikkat dağıtmayan, şık odaklanma rengi */
-  --text-primary: #ffffff;
+  --border-subtle: #1c1c1f;
+  --border-focus: #3f3f46;
+  --text-primary: #f4f4f5;
   --text-secondary: #a1a1aa;
   --text-muted: #52525b;
 }
