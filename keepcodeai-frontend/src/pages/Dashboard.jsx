@@ -117,15 +117,14 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#07080c] flex items-center justify-center">
+      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <div className="w-12 h-12 border-2 border-zinc-900 border-t-indigo-500 rounded-full animate-spin"></div>
-            <div className="absolute inset-0 w-12 h-12 border-2 border-transparent border-b-indigo-700 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+            <div className="w-12 h-12 border-2 border-zinc-800 border-t-zinc-400 rounded-full animate-spin"></div>
           </div>
           <div className="flex flex-col items-center gap-1">
-            <span className="text-xs font-bold tracking-widest text-indigo-400">SİSTEM BAŞLATILIYOR</span>
-            <span className="text-[10px] text-zinc-500">Güvenli bağlantı kuruluyor...</span>
+            <span className="text-xs font-bold tracking-widest text-zinc-450">KONSOL YÜKLENİYOR</span>
+            <span className="text-[10px] text-zinc-600">Bağlantı kontrol ediliyor...</span>
           </div>
         </div>
       </div>
@@ -136,65 +135,39 @@ export default function Dashboard() {
   const isPlanUnlimited = user.plan === 'premium';
 
   const recentActivities = [
-    { action: 'API İsteği', time: '2 dakika önce', status: 'success', icon: Terminal },
-    { action: 'Profil Güncellendi', time: '1 saat önce', status: 'success', icon: User },
-    { action: 'Yeni Anahtar Oluşturuldu', time: '3 saat önce', status: 'success', icon: Key },
-    { action: 'Plan Yükseltildi', time: '1 gün önce', status: 'info', icon: Award },
+    { action: 'API İsteği', time: '2 dakika önce', icon: Terminal },
+    { action: 'Profil Güncellendi', time: '1 saat önce', icon: User },
+    { action: 'Yeni Anahtar Oluşturuldu', time: '3 saat önce', icon: Key },
+    { action: 'Plan Yükseltildi', time: '1 gün önce', icon: Award },
   ];
 
   return (
-    <div className="min-h-screen bg-[#07080c] text-zinc-300 font-sans flex flex-col antialiased selection:bg-indigo-600/30 selection:text-white">
-      {/* Background Decorative Effects */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-900/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-purple-900/5 rounded-full blur-[150px] pointer-events-none" />
+    <div className="min-h-screen bg-[#09090b] text-zinc-300 font-sans flex flex-col antialiased selection:bg-zinc-800 selection:text-white">
       
-      {/* Grid Overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(#181922_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none" />
-
       {/* Header */}
-      <header className="border-b border-zinc-900/80 bg-[#07080c]/80 sticky top-0 z-50 backdrop-blur-xl">
+      <header className="border-b border-zinc-800 bg-[#18181b] sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white border border-indigo-400/20 shadow-lg">
-                <Code size={18} />
+              <div className="w-9 h-9 rounded-lg bg-zinc-950 flex items-center justify-center text-white border border-zinc-800 shadow-md">
+                <Code size={18} className="text-zinc-300" />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold tracking-tight text-sm text-white">KeepCode AI</span>
-                <span className="text-[9px] text-indigo-400 font-bold tracking-wider -mt-0.5">DEVELOPER CONSOLE</span>
-              </div>
-            </div>
-            
-            <div className="hidden md:flex items-center gap-1 ml-8">
-              <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-                <input 
-                  type="text"
-                  placeholder="Ara..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-[#0b0c14] border border-zinc-900 hover:border-zinc-800 focus:border-indigo-500/50 rounded-lg pl-9 pr-4 py-1.5 text-xs text-zinc-300 placeholder-zinc-600 outline-none transition-all w-64"
-                />
+                <span className="text-[9px] text-zinc-500 font-bold tracking-wider -mt-0.5">DEVELOPER CONSOLE</span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="relative p-2 hover:bg-[#111322] rounded-lg transition-colors group border border-transparent hover:border-zinc-900">
-              <Bell size={16} className="text-zinc-400 group-hover:text-zinc-200" />
-              {notifications > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-500 rounded-full"></span>
-              )}
-            </button>
-            
-            <div className="flex items-center gap-2 bg-[#0b0c14] border border-zinc-900 rounded-lg px-3.5 py-1.5">
+            <div className="flex items-center gap-2 bg-[#09090b] border border-zinc-800 rounded-lg px-3 py-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span className="text-xs font-semibold text-zinc-400">{user.email}</span>
+              <span className="text-xs font-semibold text-zinc-450">{user.email}</span>
             </div>
             
             <button 
               onClick={handleLogout}
-              className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-white bg-[#0b0c14] hover:bg-[#111322] border border-zinc-900 hover:border-zinc-800 px-3.5 py-1.5 rounded-lg transition-all"
+              className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-white bg-[#09090b] hover:bg-zinc-950 border border-zinc-800 hover:border-zinc-700 px-3.5 py-1.5 rounded-lg transition-all"
             >
               <LogOut size={13} />
               <span>Çıkış</span>
@@ -209,8 +182,8 @@ export default function Dashboard() {
         {/* Navigation Sidebar */}
         <div className="w-full md:w-60 shrink-0">
           <div className="sticky top-24 flex flex-col gap-4">
-            <div className="bg-[#0b0c14] border border-zinc-900 rounded-xl p-2 flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-indigo-400 tracking-wider px-3 py-2 block">KONSOL YÖNETİMİ</span>
+            <div className="bg-[#18181b] border border-zinc-800 rounded-xl p-2 flex flex-col gap-1 shadow-sm">
+              <span className="text-[10px] font-bold text-zinc-550 tracking-wider px-3 py-2 block">YÖNETİM</span>
               
               {[
                 { id: 'overview', label: 'Genel Bakış', icon: Server },
@@ -226,14 +199,14 @@ export default function Dashboard() {
                     onClick={() => setActiveTab(item.id)}
                     className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-bold text-left transition-all ${
                       activeTab === item.id 
-                        ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/20' 
-                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#111322] border border-transparent'
+                        ? 'bg-zinc-850 text-white border border-zinc-750' 
+                        : 'text-zinc-400 hover:text-white hover:bg-zinc-900/40 border border-transparent'
                     }`}
                   >
                     <Icon size={15} />
                     <span>{item.label}</span>
                     {activeTab === item.id && (
-                      <ChevronRight size={12} className="ml-auto text-indigo-400" />
+                      <ChevronRight size={12} className="ml-auto text-zinc-450" />
                     )}
                   </button>
                 );
@@ -241,9 +214,9 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Stats */}
-            <div className="bg-[#0b0c14] border border-zinc-900 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3 border-b border-zinc-900 pb-2">
-                <span className="text-[10px] font-bold text-zinc-500 tracking-wider">HIZLI İSTATİSTİK</span>
+            <div className="bg-[#18181b] border border-zinc-800 rounded-xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3 border-b border-zinc-800 pb-2">
+                <span className="text-[10px] font-bold text-zinc-500 tracking-wider">İSTATİSTİK</span>
                 <TrendingUp size={12} className="text-emerald-500" />
               </div>
               <div className="space-y-2">
@@ -256,8 +229,8 @@ export default function Dashboard() {
                   <span className="font-bold text-white">{Math.round(user.api_calls * 4.2)}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-zinc-500">Başarı Oranı</span>
-                  <span className="font-bold text-emerald-500">99.8%</span>
+                  <span className="text-zinc-500">Hata Payı</span>
+                  <span className="font-bold text-emerald-500">0.0%</span>
                 </div>
               </div>
             </div>
@@ -269,19 +242,15 @@ export default function Dashboard() {
           
           {/* Notifications */}
           {message && (
-            <div className="bg-[#0b0c14] border border-emerald-500/20 text-emerald-400 rounded-xl p-4 text-xs font-bold flex items-center gap-2.5 shadow-lg animate-in fade-in slide-in-from-top-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-950/20 flex items-center justify-center border border-emerald-500/30">
-                <Check size={14} className="text-emerald-400" />
-              </div>
+            <div className="bg-[#18181b] border border-emerald-500/20 text-emerald-400 rounded-xl p-4 text-xs font-bold flex items-center gap-2.5 shadow-md">
+              <Check size={14} className="shrink-0 text-emerald-500" />
               <span>{message}</span>
             </div>
           )}
 
           {errMessage && (
-            <div className="bg-[#0b0c14] border border-red-500/20 text-red-400 rounded-xl p-4 text-xs font-bold flex items-center gap-2.5 shadow-lg animate-in fade-in slide-in-from-top-2">
-              <div className="w-8 h-8 rounded-lg bg-red-950/20 flex items-center justify-center border border-red-500/30">
-                <AlertCircle size={14} className="text-red-400" />
-              </div>
+            <div className="bg-[#18181b] border border-red-500/20 text-red-400 rounded-xl p-4 text-xs font-bold flex items-center gap-2.5 shadow-md">
+              <AlertCircle size={14} className="shrink-0 text-red-500" />
               <span>{errMessage}</span>
             </div>
           )}
@@ -291,28 +260,14 @@ export default function Dashboard() {
             <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2">
               
               {/* Welcome Card */}
-              <div className="bg-gradient-to-r from-[#111322] to-[#0d0f18] border border-indigo-950/40 p-8 rounded-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -translate-y-32 translate-x-32 group-hover:scale-110 transition-transform duration-500 pointer-events-none"></div>
-                <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                      <span className="text-[10px] font-bold text-emerald-400 tracking-wider">KONSOL AKTİF</span>
-                    </div>
-                    <h1 className="text-2xl font-bold tracking-tight text-white mb-2">
-                      Hoş geldin, {user.username || 'Geliştirici'}
-                    </h1>
-                    <p className="text-xs text-zinc-400 leading-relaxed max-w-lg">
-                      Yapay zeka yetenekleriyle donatılmış asistanını yönet. API kotalarını kontrol et, lisans işlemlerini tamamla ve hemen kodlamaya başla.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 bg-[#07080c]/90 border border-zinc-900 rounded-xl px-4 py-3 shrink-0">
-                    <Zap size={20} className="text-indigo-400 animate-pulse" />
-                    <div>
-                      <div className="text-[9px] font-bold text-zinc-500 tracking-wider">LİSANS DÜZEYİ</div>
-                      <div className="text-xs font-bold text-white">{user.plan.toUpperCase()}</div>
-                    </div>
-                  </div>
+              <div className="bg-[#18181b] border border-zinc-800 p-6 rounded-xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-lg font-bold text-white">Merhaba, {user.username || 'Geliştirici'}</h1>
+                  <p className="text-xs text-zinc-400 mt-1">Hesabınızı ve API kullanım oranlarınızı bu panel üzerinden kolayca inceleyebilirsiniz.</p>
+                </div>
+                <div className="flex items-center gap-2 bg-[#09090b] border border-zinc-800 rounded-lg px-3 py-1.5 shrink-0">
+                  <Zap size={14} className="text-zinc-400" />
+                  <span className="text-[10px] font-bold text-zinc-350 tracking-wider">PLAN: {user.plan.toUpperCase()}</span>
                 </div>
               </div>
 
@@ -325,14 +280,14 @@ export default function Dashboard() {
                 ].map((stat, idx) => {
                   const Icon = stat.icon;
                   return (
-                    <div key={idx} className="bg-[#0b0c14] border border-zinc-900 p-5 rounded-xl hover:border-zinc-800/80 transition-all group flex justify-between items-center">
+                    <div key={idx} className="bg-[#18181b] border border-zinc-800 p-5 rounded-xl hover:border-zinc-700/60 transition-all group flex justify-between items-center shadow-sm">
                       <div className="flex flex-col gap-1">
                         <span className="text-[9px] font-bold text-zinc-500 tracking-wider">{stat.label}</span>
                         <div className="text-xl font-bold text-white mt-1">{stat.value}</div>
-                        <span className="text-[9px] text-zinc-600 mt-1">{stat.desc}</span>
+                        <span className="text-[9px] text-zinc-650 mt-1">{stat.desc}</span>
                       </div>
-                      <div className="w-10 h-10 rounded-xl bg-[#111322] flex items-center justify-center border border-zinc-900 group-hover:bg-[#14172a] group-hover:border-zinc-800 transition-all">
-                        <Icon size={16} className="text-indigo-400" />
+                      <div className="w-10 h-10 rounded-xl bg-[#09090b] flex items-center justify-center border border-zinc-800 transition-all">
+                        <Icon size={16} className="text-zinc-450" />
                       </div>
                     </div>
                   );
@@ -340,20 +295,20 @@ export default function Dashboard() {
               </div>
 
               {/* Usage Progress */}
-              <div className="bg-[#0b0c14] border border-zinc-900 p-6 rounded-xl">
+              <div className="bg-[#18181b] border border-zinc-800 p-6 rounded-xl shadow-sm">
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <h3 className="text-xs font-bold text-zinc-200 tracking-wider">KULLANIM HIZI</h3>
-                    <p className="text-[10px] text-zinc-500 mt-1">Bu dönemki toplam limit doluluk analizi</p>
+                    <h3 className="text-xs font-bold text-zinc-200 tracking-wider">KULLANIM DOLULUK ANALİZİ</h3>
+                    <p className="text-[10px] text-zinc-500 mt-1">Mevcut dönemdeki harcama limit durumu</p>
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-bold text-white">{isPlanUnlimited ? '0%' : `${apiPercentage}%`}</div>
-                    <div className="text-[9px] text-zinc-500 tracking-widest font-bold">KULLANIM</div>
+                    <div className="text-[9px] text-zinc-550 tracking-widest font-bold">KULLANIM</div>
                   </div>
                 </div>
-                <div className="w-full h-2 bg-[#07080c] rounded-full overflow-hidden border border-zinc-900">
+                <div className="w-full h-2 bg-[#09090b] rounded-full overflow-hidden border border-zinc-800">
                   <div 
-                    className="h-full bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-full transition-all duration-500"
+                    className="h-full bg-zinc-500 rounded-full transition-all duration-500"
                     style={{ width: `${isPlanUnlimited ? 0 : apiPercentage}%` }}
                   />
                 </div>
@@ -362,23 +317,23 @@ export default function Dashboard() {
               {/* Recent Activity & Quick Actions */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Recent Activity */}
-                <div className="bg-[#0b0c14] border border-zinc-900 p-6 rounded-xl flex flex-col justify-between">
-                  <div className="flex items-center justify-between mb-4 border-b border-zinc-900 pb-3">
+                <div className="bg-[#18181b] border border-zinc-800 p-6 rounded-xl flex flex-col justify-between shadow-sm">
+                  <div className="flex items-center justify-between mb-4 border-b border-zinc-850 pb-3">
                     <h3 className="text-xs font-bold text-zinc-200 tracking-wider">SON İŞLEMLER</h3>
-                    <button onClick={() => setActiveTab('usage')} className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors">TÜMÜ</button>
+                    <button onClick={() => setActiveTab('usage')} className="text-[10px] font-bold text-zinc-400 hover:text-white transition-colors">TÜMÜ</button>
                   </div>
                   <div className="space-y-3">
                     {recentActivities.map((activity, idx) => {
                       const Icon = activity.icon;
                       return (
-                        <div key={idx} className="flex items-center justify-between p-2.5 bg-[#07080c] border border-zinc-900/60 rounded-xl hover:border-zinc-800 transition-colors">
+                        <div key={idx} className="flex items-center justify-between p-3 bg-[#09090b] border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-[#111322] flex items-center justify-center border border-zinc-900">
-                              <Icon size={14} className="text-indigo-400" />
+                            <div className="w-8 h-8 rounded-lg bg-[#18181b] flex items-center justify-center border border-zinc-800">
+                              <Icon size={14} className="text-zinc-400" />
                             </div>
                             <div className="flex flex-col" style={{ lineHeight: '1.4' }}>
                               <span className="text-xs font-semibold text-zinc-200">{activity.action}</span>
-                              <span className="text-[9px] text-zinc-500">{activity.time}</span>
+                              <span className="text-[9px] text-zinc-550">{activity.time}</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5">
@@ -392,8 +347,8 @@ export default function Dashboard() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-[#0b0c14] border border-zinc-900 p-6 rounded-xl flex flex-col justify-between">
-                  <div className="flex items-center justify-between mb-4 border-b border-zinc-900 pb-3">
+                <div className="bg-[#18181b] border border-zinc-800 p-6 rounded-xl flex flex-col justify-between shadow-sm">
+                  <div className="flex items-center justify-between mb-4 border-b border-zinc-850 pb-3">
                     <h3 className="text-xs font-bold text-zinc-200 tracking-wider">HIZLI YÖNLENDİRME</h3>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -408,12 +363,12 @@ export default function Dashboard() {
                         <button
                           key={idx}
                           onClick={item.action}
-                          className="flex flex-col items-center gap-2.5 p-4 bg-[#07080c] border border-zinc-900 hover:border-zinc-800 rounded-xl transition-all group"
+                          className="flex flex-col items-center gap-2.5 p-4 bg-[#09090b] border border-zinc-800 hover:border-zinc-700 rounded-xl transition-all group"
                         >
-                          <div className="w-10 h-10 rounded-lg bg-[#111322] flex items-center justify-center group-hover:bg-[#14172a] group-hover:border-zinc-800 transition-all border border-zinc-900">
-                            <Icon size={16} className="text-indigo-400 group-hover:scale-105 transition-transform" />
+                          <div className="w-10 h-10 rounded-lg bg-[#18181b] flex items-center justify-center group-hover:bg-zinc-850 group-hover:border-zinc-700 transition-all border border-zinc-800">
+                            <Icon size={16} className="text-zinc-400 group-hover:scale-105 transition-transform" />
                           </div>
-                          <span className="text-xs font-bold text-zinc-400 group-hover:text-zinc-200 transition-colors">{item.label}</span>
+                          <span className="text-xs font-bold text-zinc-450 group-hover:text-zinc-250 transition-colors">{item.label}</span>
                         </button>
                       );
                     })}
@@ -422,11 +377,11 @@ export default function Dashboard() {
               </div>
 
               {/* Download Section */}
-              <div className="bg-gradient-to-r from-[#111322] to-[#0d0f18] border border-indigo-950/40 p-6 rounded-xl">
+              <div className="bg-[#18181b] border border-zinc-800 p-6 rounded-xl shadow-sm">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <Download size={16} className="text-indigo-400" />
+                      <Download size={16} className="text-zinc-400" />
                       <h3 className="text-xs font-bold text-white tracking-wider">KeepCode AI IDE İndir</h3>
                     </div>
                     <p className="text-xs text-zinc-400 leading-relaxed mb-4 max-w-xl">
@@ -434,11 +389,11 @@ export default function Dashboard() {
                     </p>
                     <div className="flex items-center gap-4 text-[10px] text-zinc-500 font-semibold">
                       <div className="flex items-center gap-1.5">
-                        <HardDrive size={12} className="text-zinc-650" />
+                        <HardDrive size={12} className="text-zinc-600" />
                         <span>Windows x64 (~245 MB)</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Globe size={12} className="text-zinc-650" />
+                        <Globe size={12} className="text-zinc-600" />
                         <span>Sürüm: v2.4.1</span>
                       </div>
                       <div className="flex items-center gap-1.5">
@@ -449,7 +404,7 @@ export default function Dashboard() {
                   </div>
                   <a 
                     href="/downloads/KeepCodeAIUserSetup-x64.exe"
-                    className="shrink-0 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all shadow-md shadow-indigo-600/10 border border-indigo-500/20"
+                    className="shrink-0 flex items-center gap-2 bg-[#09090b] hover:bg-zinc-950 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all border border-zinc-800"
                   >
                     <Download size={14} />
                     <span>Kurulumu İndir (.exe)</span>
@@ -464,10 +419,10 @@ export default function Dashboard() {
           {activeTab === 'api_keys' && (
             <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2">
               
-              <div className="bg-[#0b0c14] border border-zinc-900 p-8 rounded-2xl">
+              <div className="bg-[#18181b] border border-zinc-800 p-8 rounded-2xl shadow-sm">
                 <div className="flex items-start gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-[#111322] flex items-center justify-center border border-zinc-900">
-                    <Key size={24} className="text-indigo-400" />
+                  <div className="w-12 h-12 rounded-xl bg-[#09090b] flex items-center justify-center border border-zinc-800">
+                    <Key size={24} className="text-zinc-400" />
                   </div>
                   <div className="flex-1">
                     <h2 className="text-sm font-bold text-white tracking-wider mb-2">IDE Bağlantı Anahtarı</h2>
@@ -477,8 +432,8 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="bg-[#07080c] border border-zinc-900 rounded-xl p-5 mb-4">
-                  <div className="flex items-center justify-between mb-3 border-b border-zinc-900 pb-2">
+                <div className="bg-[#09090b] border border-zinc-805 rounded-xl p-5 mb-4">
+                  <div className="flex items-center justify-between mb-3 border-b border-zinc-850 pb-2">
                     <span className="text-[9px] font-bold text-zinc-500 tracking-wider">BAĞLANTI TOKEN'I</span>
                     <div className="flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
@@ -486,20 +441,20 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <div className="flex-1 bg-[#0b0c14] border border-zinc-900 rounded-lg px-4 py-3.5 font-mono text-xs select-all text-zinc-300 min-h-[48px] flex items-center overflow-x-auto">
+                    <div className="flex-1 bg-[#18181b] border border-zinc-800 rounded-lg px-4 py-3.5 font-mono text-xs select-all text-zinc-350 min-h-[48px] flex items-center overflow-x-auto">
                       {showToken ? token : '•'.repeat(64)}
                     </div>
                     <div className="flex gap-2">
                       <button 
                         onClick={() => setShowToken(!showToken)}
-                        className="px-4 rounded-lg bg-[#111322] hover:bg-[#14172a] text-xs font-bold text-zinc-400 hover:text-zinc-200 transition-all border border-zinc-900 flex items-center justify-center gap-1.5 h-12"
+                        className="px-4 rounded-lg bg-[#18181b] hover:bg-zinc-950 text-xs font-bold text-zinc-400 hover:text-white transition-all border border-zinc-800 flex items-center justify-center gap-1.5 h-12"
                       >
                         {showToken ? <EyeOff size={14} /> : <Eye size={14} />}
                         <span>{showToken ? 'Gizle' : 'Göster'}</span>
                       </button>
                       <button 
                         onClick={handleCopyToken}
-                        className="px-6 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 h-12 shrink-0 border border-indigo-500/25 shadow-md shadow-indigo-600/10"
+                        className="px-6 rounded-lg bg-white hover:bg-zinc-200 text-[#09090b] text-xs font-bold transition-all flex items-center justify-center gap-1.5 h-12 shrink-0 border border-zinc-300"
                       >
                         {copied ? <Check size={14} /> : <Copy size={14} />}
                         <span>{copied ? 'Kopyalandı' : 'Kopyala'}</span>
@@ -509,24 +464,24 @@ export default function Dashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="bg-[#07080c] border border-zinc-900 rounded-lg p-3">
+                  <div className="bg-[#09090b] border border-zinc-800 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
-                      <Clock size={12} className="text-zinc-600" />
+                      <Clock size={12} className="text-zinc-650" />
                       <span className="text-[9px] font-bold text-zinc-500 tracking-wider">ÜRETİM TARİHİ</span>
                     </div>
                     <div className="text-xs text-zinc-400 font-medium">15 Ocak 2026</div>
                   </div>
-                  <div className="bg-[#07080c] border border-zinc-900 rounded-lg p-3">
+                  <div className="bg-[#09090b] border border-zinc-800 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
-                      <Activity size={12} className="text-zinc-600" />
+                      <Activity size={12} className="text-zinc-650" />
                       <span className="text-[9px] font-bold text-zinc-500 tracking-wider">SON ERİŞİM</span>
                     </div>
                     <div className="text-xs text-zinc-400 font-medium">2 dakika önce</div>
                   </div>
-                  <div className="bg-[#07080c] border border-zinc-900 rounded-lg p-3">
+                  <div className="bg-[#09090b] border border-zinc-800 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <Shield size={12} className="text-zinc-650" />
-                      <span className="text-[9px] font-bold text-zinc-500 tracking-wider">ŞİFRELEME</span>
+                      <span className="text-[9px] font-bold text-zinc-500 tracking-wider">GÜVENLİK</span>
                     </div>
                     <div className="text-xs text-emerald-500 font-bold">SHA-256</div>
                   </div>
@@ -534,24 +489,24 @@ export default function Dashboard() {
               </div>
 
               {/* Help Box */}
-              <div className="bg-[#0b0c14] border border-zinc-900 p-6 rounded-xl">
+              <div className="bg-[#18181b] border border-zinc-800 p-6 rounded-xl shadow-sm">
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-[#111322] flex items-center justify-center shrink-0 border border-zinc-900">
-                    <HelpCircle size={20} className="text-indigo-400" />
+                  <div className="w-10 h-10 rounded-lg bg-[#09090b] flex items-center justify-center shrink-0 border border-zinc-800">
+                    <HelpCircle size={20} className="text-zinc-450" />
                   </div>
                   <div className="flex-grow">
                     <h3 className="text-xs font-bold text-white tracking-wider mb-3">Anahtarımı Nasıl Kullanırım?</h3>
                     <div className="space-y-2.5 text-xs text-zinc-400 leading-relaxed">
                       <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-[#111322] flex items-center justify-center shrink-0 text-[10px] font-bold text-indigo-400 border border-zinc-900">1</div>
+                        <div className="w-6 h-6 rounded-full bg-[#09090b] flex items-center justify-center shrink-0 text-[10px] font-bold text-zinc-450 border border-zinc-800">1</div>
                         <span className="pt-0.5">Yukarıdaki bağlantı anahtarını (Token) kopyalayın.</span>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-[#111322] flex items-center justify-center shrink-0 text-[10px] font-bold text-indigo-400 border border-zinc-900">2</div>
+                        <div className="w-6 h-6 rounded-full bg-[#09090b] flex items-center justify-center shrink-0 text-[10px] font-bold text-zinc-450 border border-zinc-800">2</div>
                         <span className="pt-0.5">KeepCode AI editörünü açıp sol alt köşedeki "Giriş Yap" butonuna tıklayın.</span>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-[#111322] flex items-center justify-center shrink-0 text-[10px] font-bold text-indigo-400 border border-zinc-900">3</div>
+                        <div className="w-6 h-6 rounded-full bg-[#09090b] flex items-center justify-center shrink-0 text-[10px] font-bold text-zinc-450 border border-zinc-800">3</div>
                         <span className="pt-0.5">Açılan kutuya bu anahtarı yapıştırıp onaylayın. Sisteminiz anında yetkilendirilecektir.</span>
                       </div>
                     </div>
@@ -566,10 +521,10 @@ export default function Dashboard() {
           {activeTab === 'usage' && (
             <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2">
               
-              <div className="bg-[#0b0c14] border border-zinc-900 p-8 rounded-2xl">
+              <div className="bg-[#18181b] border border-zinc-800 p-8 rounded-2xl shadow-sm">
                 <div className="flex items-start gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-[#111322] flex items-center justify-center border border-zinc-900">
-                    <BarChart3 size={24} className="text-indigo-400" />
+                  <div className="w-12 h-12 rounded-xl bg-[#09090b] flex items-center justify-center border border-zinc-800">
+                    <BarChart3 size={24} className="text-zinc-400" />
                   </div>
                   <div className="flex-1">
                     <h2 className="text-sm font-bold text-white tracking-wider mb-2">Detaylı Kullanım Grafikleri</h2>
@@ -578,7 +533,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                  <div className="bg-[#07080c] border border-zinc-900 p-5 rounded-xl">
+                  <div className="bg-[#09090b] border border-zinc-800 p-5 rounded-xl">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-[9px] font-bold text-zinc-500 tracking-wider">BUGÜN</span>
                       <TrendingUp size={14} className="text-emerald-500" />
@@ -586,7 +541,7 @@ export default function Dashboard() {
                     <div className="text-xl font-bold text-white mb-1">{user.api_calls}</div>
                     <div className="text-[10px] text-emerald-500 font-semibold">+12% Artış</div>
                   </div>
-                  <div className="bg-[#07080c] border border-zinc-900 p-5 rounded-xl">
+                  <div className="bg-[#09090b] border border-zinc-800 p-5 rounded-xl">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-[9px] font-bold text-zinc-500 tracking-wider">BU HAFTA</span>
                       <TrendingUp size={14} className="text-emerald-500" />
@@ -594,7 +549,7 @@ export default function Dashboard() {
                     <div className="text-xl font-bold text-white mb-1">{Math.round(user.api_calls * 4.2)}</div>
                     <div className="text-[10px] text-emerald-500 font-semibold">+8% Artış</div>
                   </div>
-                  <div className="bg-[#07080c] border border-zinc-900 p-5 rounded-xl">
+                  <div className="bg-[#09090b] border border-zinc-800 p-5 rounded-xl">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-[9px] font-bold text-zinc-500 tracking-wider">BU AY</span>
                       <TrendingDown size={14} className="text-zinc-650" />
@@ -605,19 +560,19 @@ export default function Dashboard() {
                 </div>
 
                 {/* Graph */}
-                <div className="bg-[#07080c] border border-zinc-900 p-6 rounded-xl">
+                <div className="bg-[#09090b] border border-zinc-800 p-6 rounded-xl">
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h3 className="text-xs font-bold text-zinc-200 tracking-wider mb-1">Son 7 Günlük API Akışı</h3>
                       <p className="text-[10px] text-zinc-500">Günlük istek dağılımı</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button className="px-3 py-1.5 bg-[#111322] hover:bg-[#14172a] text-xs font-bold text-indigo-400 rounded-lg transition-colors border border-zinc-900">7G</button>
-                      <button className="px-3 py-1.5 hover:bg-[#111322] text-xs font-bold text-zinc-500 rounded-lg transition-colors">30G</button>
+                      <button className="px-3 py-1.5 bg-[#18181b] hover:bg-zinc-800 text-xs font-bold text-zinc-400 rounded-lg transition-colors border border-zinc-800">7G</button>
+                      <button className="px-3 py-1.5 hover:bg-[#18181b] text-xs font-bold text-zinc-500 rounded-lg transition-colors">30G</button>
                     </div>
                   </div>
                   
-                  <div className="h-48 flex items-end justify-between gap-3 mb-4 pt-4 border-b border-zinc-900/60 pb-2">
+                  <div className="h-48 flex items-end justify-between gap-3 mb-4 pt-4 border-b border-zinc-800 pb-2">
                     {[
                       { day: 'Pzt', value: 30 },
                       { day: 'Sal', value: 65 },
@@ -628,9 +583,9 @@ export default function Dashboard() {
                       { day: 'Paz', value: 95 },
                     ].map((item, idx) => (
                       <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                        <div className="w-full bg-[#0b0c14] border border-zinc-900/40 rounded-t-lg overflow-hidden flex flex-col justify-end" style={{ height: '140px' }}>
+                        <div className="w-full bg-[#18181b] border border-zinc-800 rounded-t-lg overflow-hidden flex flex-col justify-end" style={{ height: '140px' }}>
                           <div 
-                            className="bg-gradient-to-t from-indigo-600 to-indigo-500 rounded-t-lg transition-all duration-500 hover:from-indigo-500 hover:to-indigo-400"
+                            className="bg-gradient-to-t from-zinc-600 to-zinc-500 rounded-t-lg transition-all duration-500 hover:from-zinc-500 hover:to-zinc-450"
                             style={{ height: `${item.value}%` }}
                           />
                         </div>
@@ -659,10 +614,10 @@ export default function Dashboard() {
           {activeTab === 'billing' && (
             <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2">
               
-              <div className="bg-[#0b0c14] border border-zinc-900 p-8 rounded-2xl">
+              <div className="bg-[#18181b] border border-zinc-800 p-8 rounded-2xl shadow-sm">
                 <div className="flex items-start gap-4 mb-8">
-                  <div className="w-12 h-12 rounded-xl bg-[#111322] flex items-center justify-center border border-zinc-900">
-                    <CreditCard size={24} className="text-indigo-400" />
+                  <div className="w-12 h-12 rounded-xl bg-[#09090b] flex items-center justify-center border border-zinc-800">
+                    <CreditCard size={24} className="text-zinc-400" />
                   </div>
                   <div className="flex-1">
                     <h2 className="text-sm font-bold text-white tracking-wider mb-2">Kullanım Planları & Abonelik</h2>
@@ -674,21 +629,21 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Free Plan */}
-                  <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-6 transition-all bg-[#07080c] ${
-                    user.plan === 'free' ? 'border-indigo-500 shadow-md shadow-indigo-600/5' : 'border-zinc-900 hover:border-zinc-800'
+                  <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-6 transition-all bg-[#09090b] ${
+                    user.plan === 'free' ? 'border-zinc-500 shadow-md' : 'border-zinc-800 hover:border-zinc-700'
                   }`}>
                     <div className="flex flex-col gap-4">
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-xs text-zinc-300">Ücretsiz (Free)</span>
                         {user.plan === 'free' && (
-                          <span className="text-[9px] bg-indigo-500/10 text-indigo-400 font-bold px-2 py-0.5 rounded-full border border-indigo-500/20">MEVCUT</span>
+                          <span className="text-[9px] bg-zinc-800 text-zinc-300 font-bold px-2 py-0.5 rounded-full border border-zinc-755">MEVCUT</span>
                         )}
                       </div>
                       <div className="flex items-baseline gap-1 py-1">
                         <span className="text-2xl font-extrabold text-white">$0</span>
                         <span className="text-[10px] text-zinc-650">/ her zaman</span>
                       </div>
-                      <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-900/60 pt-3">
+                      <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-800 pt-3">
                         <li className="flex items-center gap-2">
                           <Check size={12} className="text-zinc-500" />
                           <span>Aylık 50 AI İstek</span>
@@ -704,8 +659,8 @@ export default function Dashboard() {
                       onClick={() => handleUpgrade('free')}
                       className={`w-full py-3 rounded-xl text-xs font-bold transition-all ${
                         user.plan === 'free'
-                          ? 'bg-[#111322] text-zinc-600 border border-zinc-900 cursor-not-allowed'
-                          : 'bg-[#111322] hover:bg-[#14172a] text-zinc-300 border border-zinc-900'
+                          ? 'bg-[#18181b] text-zinc-600 border border-zinc-800 cursor-not-allowed'
+                          : 'bg-[#18181b] hover:bg-zinc-950 text-zinc-300 border border-zinc-800'
                       }`}
                     >
                       {user.plan === 'free' ? 'Mevcut Plan' : 'Seç'}
@@ -713,24 +668,24 @@ export default function Dashboard() {
                   </div>
 
                   {/* Pro Plan */}
-                  <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-6 transition-all bg-[#07080c] relative ${
-                    user.plan === 'pro' ? 'border-indigo-500 shadow-md shadow-indigo-600/5' : 'border-zinc-900 hover:border-zinc-800'
+                  <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-6 transition-all bg-[#09090b] relative ${
+                    user.plan === 'pro' ? 'border-zinc-500 shadow-md' : 'border-zinc-800 hover:border-zinc-700'
                   }`}>
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="bg-indigo-600 text-white text-[9px] font-bold px-3 py-1 rounded-full border border-indigo-500/25">ÖNERİLEN</span>
+                      <span className="bg-white text-[#09090b] text-[9px] font-bold px-3 py-1 rounded-full border border-zinc-300">ÖNERİLEN</span>
                     </div>
                     <div className="flex flex-col gap-4">
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-xs text-zinc-300">Gelişmiş (Pro)</span>
                         {user.plan === 'pro' && (
-                          <span className="text-[9px] bg-indigo-500/10 text-indigo-400 font-bold px-2 py-0.5 rounded-full border border-indigo-500/20">MEVCUT</span>
+                          <span className="text-[9px] bg-zinc-800 text-zinc-300 font-bold px-2 py-0.5 rounded-full border border-zinc-755">MEVCUT</span>
                         )}
                       </div>
                       <div className="flex items-baseline gap-1 py-1">
                         <span className="text-2xl font-extrabold text-white">$19</span>
                         <span className="text-[10px] text-zinc-650">/ aylık</span>
                       </div>
-                      <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-900/60 pt-3">
+                      <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-800 pt-3">
                         <li className="flex items-center gap-2">
                           <Check size={12} className="text-emerald-500" />
                           <span>Aylık 5,000 AI İstek</span>
@@ -746,8 +701,8 @@ export default function Dashboard() {
                       onClick={() => handleUpgrade('pro')}
                       className={`w-full py-3 rounded-xl text-xs font-bold transition-all ${
                         user.plan === 'pro'
-                          ? 'bg-[#111322] text-zinc-600 border border-zinc-900 cursor-not-allowed'
-                          : 'bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500/20 shadow-md shadow-indigo-600/10'
+                          ? 'bg-[#18181b] text-zinc-600 border border-zinc-800 cursor-not-allowed'
+                          : 'bg-white hover:bg-zinc-200 text-[#09090b]'
                       }`}
                     >
                       {upgradeLoading && user.plan !== 'pro' ? 'Yükleniyor...' : user.plan === 'pro' ? 'Mevcut Plan' : 'Pro Planına Geç'}
@@ -755,27 +710,27 @@ export default function Dashboard() {
                   </div>
 
                   {/* Premium Plan */}
-                  <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-6 transition-all bg-[#07080c] ${
-                    user.plan === 'premium' ? 'border-indigo-500 shadow-md shadow-indigo-600/5' : 'border-zinc-900 hover:border-zinc-800'
+                  <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-6 transition-all bg-[#09090b] ${
+                    user.plan === 'premium' ? 'border-zinc-500 shadow-md' : 'border-zinc-800 hover:border-zinc-700'
                   }`}>
                     <div className="flex flex-col gap-4">
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-xs text-zinc-300">Sınırsız (Premium)</span>
                         {user.plan === 'premium' && (
-                          <span className="text-[9px] bg-indigo-500/10 text-indigo-400 font-bold px-2 py-0.5 rounded-full border border-indigo-500/20">MEVCUT</span>
+                          <span className="text-[9px] bg-zinc-800 text-zinc-300 font-bold px-2 py-0.5 rounded-full border border-zinc-755">MEVCUT</span>
                         )}
                       </div>
                       <div className="flex items-baseline gap-1 py-1">
                         <span className="text-2xl font-extrabold text-white">$99</span>
                         <span className="text-[10px] text-zinc-650">/ aylık</span>
                       </div>
-                      <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-900/60 pt-3">
+                      <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-800 pt-3">
                         <li className="flex items-center gap-2">
-                          <Check size={12} className="text-indigo-400" />
+                          <Check size={12} className="text-zinc-450" />
                           <span>Sınırsız AI İstek</span>
                         </li>
                         <li className="flex items-center gap-2">
-                          <Check size={12} className="text-indigo-400" />
+                          <Check size={12} className="text-zinc-450" />
                           <span>Özel Öncelikli Hat</span>
                         </li>
                       </ul>
@@ -785,8 +740,8 @@ export default function Dashboard() {
                       onClick={() => handleUpgrade('premium')}
                       className={`w-full py-3 rounded-xl text-xs font-bold transition-all ${
                         user.plan === 'premium'
-                          ? 'bg-[#111322] text-zinc-600 border border-zinc-900 cursor-not-allowed'
-                          : 'bg-[#111322] hover:bg-[#14172a] text-zinc-300 border border-zinc-900'
+                          ? 'bg-[#18181b] text-zinc-600 border border-zinc-800 cursor-not-allowed'
+                          : 'bg-[#18181b] hover:bg-[#14172a] text-zinc-300 border border-zinc-800'
                       }`}
                     >
                       {upgradeLoading && user.plan !== 'premium' ? 'Yükleniyor...' : user.plan === 'premium' ? 'Mevcut Plan' : 'Premium Plana Geç'}
@@ -803,10 +758,10 @@ export default function Dashboard() {
             <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2">
               
               {/* Profile Section */}
-              <div className="bg-[#0b0c14] border border-zinc-900 p-8 rounded-2xl">
+              <div className="bg-[#18181b] border border-zinc-800 p-8 rounded-2xl shadow-sm">
                 <div className="flex items-start gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-[#111322] flex items-center justify-center border border-zinc-900">
-                    <User size={24} className="text-indigo-400" />
+                  <div className="w-12 h-12 rounded-xl bg-[#09090b] flex items-center justify-center border border-zinc-800">
+                    <User size={24} className="text-zinc-450" />
                   </div>
                   <div className="flex-grow">
                     <h2 className="text-sm font-bold text-white tracking-wider mb-2">Profil Bilgileri</h2>
@@ -821,7 +776,7 @@ export default function Dashboard() {
                       type="text" 
                       value={newUsername}
                       onChange={(e) => setNewUsername(e.target.value)}
-                      className="w-full bg-[#07080c] border border-zinc-900 hover:border-zinc-800 focus:border-indigo-500/50 outline-none rounded-xl px-4 py-3 text-xs font-semibold text-white transition-all"
+                      className="w-full bg-[#09090b] border border-zinc-800 hover:border-zinc-700 focus:border-zinc-600 outline-none rounded-xl px-4 py-3 text-xs font-semibold text-white transition-all"
                       required
                     />
                   </div>
@@ -832,7 +787,7 @@ export default function Dashboard() {
                       type="email" 
                       value={user.email}
                       disabled
-                      className="w-full bg-[#07080c]/60 border border-zinc-900/60 rounded-xl px-4 py-3 text-xs font-semibold text-zinc-500 cursor-not-allowed"
+                      className="w-full bg-[#09090b] border border-zinc-850 rounded-xl px-4 py-3 text-xs font-semibold text-zinc-500 cursor-not-allowed"
                     />
                     <p className="text-[9px] text-zinc-650 mt-1">E-posta adresi değiştirilemez</p>
                   </div>
@@ -840,7 +795,7 @@ export default function Dashboard() {
                   <button 
                     type="submit"
                     disabled={settingsLoading}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-3 px-6 rounded-xl transition-all border border-indigo-500/25 shadow-md shadow-indigo-600/10"
+                    className="bg-white hover:bg-zinc-200 text-[#09090b] font-bold text-xs py-3 px-6 rounded-xl transition-all border border-zinc-300"
                   >
                     {settingsLoading ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
                   </button>
@@ -848,10 +803,10 @@ export default function Dashboard() {
               </div>
 
               {/* Password Section */}
-              <div className="bg-[#0b0c14] border border-zinc-900 p-8 rounded-2xl">
+              <div className="bg-[#18181b] border border-zinc-800 p-8 rounded-2xl shadow-sm">
                 <div className="flex items-start gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-[#111322] flex items-center justify-center border border-zinc-900">
-                    <Lock size={24} className="text-indigo-400" />
+                  <div className="w-12 h-12 rounded-xl bg-[#09090b] flex items-center justify-center border border-zinc-800">
+                    <Lock size={24} className="text-zinc-450" />
                   </div>
                   <div className="flex-grow">
                     <h2 className="text-sm font-bold text-white tracking-wider mb-2">Şifre Değiştir</h2>
@@ -866,7 +821,7 @@ export default function Dashboard() {
                       type={showPass ? 'text' : 'password'}
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="w-full bg-[#07080c] border border-zinc-900 hover:border-zinc-800 focus:border-indigo-500/50 outline-none rounded-xl px-4 py-3 text-xs font-semibold text-white transition-all"
+                      className="w-full bg-[#09090b] border border-zinc-800 hover:border-zinc-700 focus:border-zinc-600 outline-none rounded-xl px-4 py-3 text-xs font-semibold text-white transition-all"
                       required
                     />
                   </div>
@@ -878,7 +833,7 @@ export default function Dashboard() {
                         type={showPass ? 'text' : 'password'}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full bg-[#07080c] border border-zinc-900 hover:border-zinc-800 focus:border-indigo-500/50 outline-none rounded-xl px-4 py-3 text-xs font-semibold text-white transition-all pr-10"
+                        className="w-full bg-[#09090b] border border-zinc-800 hover:border-zinc-700 focus:border-zinc-600 outline-none rounded-xl px-4 py-3 text-xs font-semibold text-white transition-all pr-10"
                         required
                       />
                       <button 
@@ -894,7 +849,7 @@ export default function Dashboard() {
 
                   <button 
                     type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-3 px-6 rounded-xl transition-all border border-indigo-500/25 shadow-md shadow-indigo-600/10"
+                    className="bg-white hover:bg-zinc-200 text-[#09090b] font-bold text-xs py-3 px-6 rounded-xl transition-all border border-zinc-300"
                   >
                     Şifreyi Güncelle
                   </button>
@@ -909,25 +864,25 @@ export default function Dashboard() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-900/60 py-12 bg-[#07080c] relative z-10 mt-16">
+      <footer className="border-t border-zinc-800 py-12 bg-[#18181b] mt-16">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white border border-indigo-500/25 shadow-md">
-                <Code size={16} />
+              <div className="w-8 h-8 rounded-lg bg-zinc-950 flex items-center justify-center text-white border border-zinc-800 shadow-md">
+                <Code size={16} className="text-zinc-300" />
               </div>
               <span className="font-extrabold text-sm text-white">KeepCode AI</span>
             </div>
             <p className="text-xs text-zinc-500 leading-relaxed mt-2">
               Yapay zeka destekli kodlama asistanınız. Geliştiriciler için tasarlanmış güçlü araçlarla kodlama deneyiminizi bir üst seviyeye taşıyın.
             </p>
-            <div className="flex items-center gap-4 text-[10px] text-zinc-600 mt-2 font-semibold">
+            <div className="flex items-center gap-4 text-[10px] text-zinc-500 mt-2 font-semibold">
               <span className="flex items-center gap-1">
-                <Shield size={12} />
+                <Shield size={12} className="text-zinc-600" />
                 <span>SSL Korumalı</span>
               </span>
               <span className="flex items-center gap-1">
-                <Globe size={12} />
+                <Globe size={12} className="text-zinc-600" />
                 <span>Global CDN</span>
               </span>
             </div>
@@ -954,8 +909,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-zinc-900/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs text-zinc-650 font-medium">
+        <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-xs text-zinc-600 font-medium">
             &copy; {new Date().getFullYear()} KeepCode AI. Tüm hakları saklıdır.
           </div>
           <div className="flex items-center gap-6 text-xs text-zinc-500 font-semibold">
