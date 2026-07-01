@@ -366,6 +366,59 @@ app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:plat
     }
 });
 
+// Stream latest installer exe directly from private GitHub release
+app.get('/downloads/KeepCodeAIUserSetup-x64.exe', async (req, res) => {
+    console.log('Download request received for KeepCodeAIUserSetup-x64.exe');
+    try {
+        const headers = {
+            'User-Agent': 'KeepCodeAI-Update-Server',
+            'Accept': 'application/vnd.github.v3+json'
+        };
+        if (process.env.GITHUB_TOKEN) {
+            headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+        }
+        
+        const ghResponse = await fetch('https://api.github.com/repos/TolgaCulfa1/KeepCodeAi-Exe/releases/tags/latest', { headers });
+        if (!ghResponse.ok) {
+            console.error('Failed to fetch release for download, status:', ghResponse.status);
+            return res.status(404).send('Release not found');
+        }
+        
+        const release = await ghResponse.json();
+        const exeAsset = release.assets.find(a => a.name.endsWith('.exe'));
+        if (!exeAsset) {
+            console.error('No EXE asset found in the latest release');
+            return res.status(404).send('Installer executable not found in release');
+        }
+
+        console.log(`Streaming asset: ${exeAsset.name} (ID: ${exeAsset.id}, Size: ${exeAsset.size} bytes)`);
+        
+        const assetResponse = await fetch(exeAsset.url, {
+            headers: {
+                ...headers,
+                'Accept': 'application/octet-stream'
+            }
+        });
+
+        if (!assetResponse.ok) {
+            console.error('Failed to fetch asset from GitHub, status:', assetResponse.status);
+            return res.status(502).send('Failed to fetch installer from GitHub');
+        }
+
+        res.setHeader('Content-Disposition', 'attachment; filename="KeepCodeAIUserSetup-x64.exe"');
+        res.setHeader('Content-Type', 'application/octet-stream');
+        if (exeAsset.size) {
+            res.setHeader('Content-Length', exeAsset.size);
+        }
+
+        require('stream').Readable.from(assetResponse.body).pipe(res);
+        console.log('Download streaming initiated');
+    } catch (err) {
+        console.error('Error serving download:', err);
+        res.status(500).send('Internal server error');
+    }
+});
+
 // SPA (Single Page Application) routing fallback: Serve index.html for all other routes
 app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
