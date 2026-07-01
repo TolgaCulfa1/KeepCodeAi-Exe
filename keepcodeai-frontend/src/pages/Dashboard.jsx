@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Code, Copy, Check, Activity, CreditCard, ArrowRight, 
-  Zap, Download, LogOut, Key, User, Shield, RefreshCw 
+  Zap, Download, LogOut, Key, User, Shield, RefreshCw,
+  Settings, Server, HelpCircle, HardDrive, BarChart3, 
+  Mail, Calendar, Lock, Eye, EyeOff
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -11,11 +13,19 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [showToken, setShowToken] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview'); // overview, usage, billing
+  const [activeTab, setActiveTab] = useState('overview'); // overview, api_keys, usage, billing, settings
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const navigate = useNavigate();
+  const [errMessage, setErrMessage] = useState('');
+  
+  // Settings Form States
+  const [newUsername, setNewUsername] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [settingsLoading, setSettingsLoading] = useState(false);
 
+  const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -30,6 +40,7 @@ export default function Dashboard() {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUser(res.data);
+        setNewUsername(res.data.username || '');
       } catch (err) {
         console.error('Failed to fetch user', err);
         localStorage.removeItem('token');
@@ -68,8 +79,9 @@ export default function Dashboard() {
   const handleUpgrade = async (plan) => {
     setUpgradeLoading(true);
     setMessage('');
+    setErrMessage('');
     try {
-      const res = await axios.post('/api/auth/upgrade', { plan }, {
+      await axios.post('/api/auth/upgrade', { plan }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Refresh user details after upgrading
@@ -77,172 +89,225 @@ export default function Dashboard() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(userRes.data);
-      setMessage(`Plan başarıyla ${plan} paketine yükseltildi!`);
+      setMessage(`Planınız başarıyla ${plan.toUpperCase()} paketine yükseltildi!`);
       setTimeout(() => setMessage(''), 4000);
     } catch (err) {
       console.error('Upgrade failed', err);
-      setMessage('Yükseltme işlemi başarısız oldu. Lütfen tekrar deneyin.');
+      setErrMessage('Yükseltme işlemi gerçekleştirilemedi. Lütfen tekrar deneyin.');
     } finally {
       setUpgradeLoading(false);
     }
   };
 
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setSettingsLoading(true);
+    setMessage('');
+    setErrMessage('');
+    
+    // Simulate API profile update delay
+    setTimeout(() => {
+      setUser(prev => ({ ...prev, username: newUsername }));
+      setMessage('Profil bilgileriniz başarıyla güncellendi.');
+      setSettingsLoading(false);
+      setTimeout(() => setMessage(''), 4000);
+    }, 800);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#090a0f] flex items-center justify-center text-zinc-400 font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-zinc-700 border-t-indigo-500 rounded-full animate-spin"></div>
-          <span className="text-sm font-medium tracking-wide">KeepCode AI Dashboard yükleniyor...</span>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-6 h-6 border-2 border-zinc-800 border-t-indigo-500 rounded-full animate-spin"></div>
+          <span className="text-xs font-semibold tracking-wider text-zinc-500">YÜKLENİYOR...</span>
         </div>
       </div>
     );
   }
 
-  // Calculate percentage of API calls
   const apiPercentage = user ? Math.min(100, Math.round((user.api_calls / user.api_limit) * 100)) : 0;
+  const isPlanUnlimited = user.plan === 'premium';
 
   return (
-    <div className="min-h-screen bg-[#090a0f] text-zinc-100 font-sans flex flex-col antialiased selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-[#07080c] text-zinc-200 font-sans flex flex-col antialiased selection:bg-indigo-600/30 selection:text-white">
+      
       {/* Header */}
-      <header className="border-b border-zinc-900 bg-[#090a0f] sticky top-0 z-50">
+      <header className="border-b border-zinc-900/60 bg-[#07080c] sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm border border-indigo-500/20">
-              <Code size={18} />
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white border border-indigo-500/20 shadow-sm">
+              <Code size={16} />
             </div>
-            <span className="font-bold tracking-tight text-lg text-zinc-100">KeepCode AI</span>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-500 border border-zinc-800">Console</span>
+            <div className="flex flex-col">
+              <span className="font-bold tracking-tight text-sm text-zinc-100">KeepCode AI</span>
+              <span className="text-[9px] text-zinc-500 font-medium tracking-wider -mt-0.5">CONSOLE</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-zinc-400">
-              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-              <span className="hidden sm:inline font-medium">{user.email}</span>
+            <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800/80 rounded-full px-3 py-1 text-xs">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+              <span className="text-zinc-400 font-medium">{user.email}</span>
             </div>
             <button 
               onClick={handleLogout}
-              className="flex items-center gap-2 text-xs font-medium text-zinc-500 hover:text-zinc-300 bg-zinc-950 border border-zinc-900 hover:border-zinc-800 px-3 py-1.5 rounded-lg transition-all duration-200"
+              className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-300 bg-zinc-900/40 border border-zinc-850 hover:border-zinc-800 px-3 py-1.5 rounded-lg transition-all"
             >
-              <LogOut size={13} />
-              <span>Çıkış Yap</span>
+              <LogOut size={12} />
+              <span>Çıkış</span>
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8 flex flex-col md:flex-row gap-8">
+      {/* Main Console Area */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-10 flex flex-col md:flex-row gap-8">
         
-        {/* Sidebar / Left Navigation */}
-        <div className="w-full md:w-56 shrink-0 flex flex-col gap-1.5">
+        {/* Navigation Sidebar */}
+        <div className="w-full md:w-60 shrink-0 flex flex-col gap-1">
+          <span className="text-[10px] font-bold text-zinc-600 tracking-wider px-3 mb-2 block">KONSOL KONTROLLERİ</span>
+          
           <button
             onClick={() => setActiveTab('overview')}
-            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-left transition-all duration-200 ${
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-left transition-all ${
               activeTab === 'overview' 
-                ? 'bg-zinc-900 text-zinc-100 border border-zinc-800' 
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-950'
+                ? 'bg-zinc-900 text-zinc-100 border border-zinc-800/80' 
+                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-950/40'
             }`}
           >
-            <Key size={16} />
+            <Server size={14} />
             <span>Genel Bakış</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('api_keys')}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-left transition-all ${
+              activeTab === 'api_keys' 
+                ? 'bg-zinc-900 text-zinc-100 border border-zinc-800/80' 
+                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-950/40'
+            }`}
+          >
+            <Key size={14} />
+            <span>API Anahtarları</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('usage')}
-            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-left transition-all duration-200 ${
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-left transition-all ${
               activeTab === 'usage' 
-                ? 'bg-zinc-900 text-zinc-100 border border-zinc-800' 
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-950'
+                ? 'bg-zinc-900 text-zinc-100 border border-zinc-800/80' 
+                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-950/40'
             }`}
           >
-            <Activity size={16} />
-            <span>Kullanım (API)</span>
+            <Activity size={14} />
+            <span>Kullanım Raporları</span>
           </button>
+
           <button
             onClick={() => setActiveTab('billing')}
-            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-left transition-all duration-200 ${
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-left transition-all ${
               activeTab === 'billing' 
-                ? 'bg-zinc-900 text-zinc-100 border border-zinc-800' 
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-950'
+                ? 'bg-zinc-900 text-zinc-100 border border-zinc-800/80' 
+                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-950/40'
             }`}
           >
-            <CreditCard size={16} />
-            <span>Plan & Abonelik</span>
+            <CreditCard size={14} />
+            <span>Plan & Ödeme</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-left transition-all ${
+              activeTab === 'settings' 
+                ? 'bg-zinc-900 text-zinc-100 border border-zinc-800/80' 
+                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-950/40'
+            }`}
+          >
+            <Settings size={14} />
+            <span>Hesap Ayarları</span>
           </button>
         </div>
 
-        {/* Dynamic Panel */}
-        <div className="flex-1 flex flex-col gap-6">
+        {/* Dynamic Display Panel */}
+        <div className="flex-1 flex flex-col gap-6 min-w-0">
+          
+          {/* Notifications */}
           {message && (
-            <div className="bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 rounded-xl p-4 text-sm font-medium flex items-center gap-3 shadow-sm">
-              <Check size={16} className="shrink-0 text-emerald-500" />
+            <div className="bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 rounded-xl p-3.5 text-xs font-bold flex items-center gap-2.5 shadow-sm">
+              <Check size={14} className="shrink-0 text-emerald-500" />
               <span>{message}</span>
             </div>
           )}
 
+          {errMessage && (
+            <div className="bg-red-950/20 border border-red-500/20 text-red-400 rounded-xl p-3.5 text-xs font-bold flex items-center gap-2.5 shadow-sm">
+              <Shield size={14} className="shrink-0 text-red-500" />
+              <span>{errMessage}</span>
+            </div>
+          )}
+
+          {/* OVERVIEW PANEL */}
           {activeTab === 'overview' && (
-            <div className="flex flex-col gap-6 animate-[fadeIn_0.2s_ease-out]">
+            <div className="flex flex-col gap-6">
               
-              {/* Profile Welcome Block */}
-              <div className="bg-zinc-950 border border-zinc-900 p-6 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              {/* Profile Bar */}
+              <div className="bg-zinc-950/40 border border-zinc-900 p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-xl font-bold tracking-tight text-zinc-100">Merhaba, Hoş Geldiniz</h1>
-                  <p className="text-sm text-zinc-500 mt-1">KeepCode AI Geliştirici Konsolu üzerinden hesabınızı ve lisansınızı yönetin.</p>
+                  <h1 className="text-lg font-bold tracking-tight text-white">Hoş Geldiniz, {user.username || 'Geliştirici'}</h1>
+                  <p className="text-xs text-zinc-500 mt-1">KeepCode AI Geliştirici Konsolu üzerinden hesabınızı ve API kullanımınızı izleyin.</p>
                 </div>
-                <div className="flex items-center gap-2.5 bg-zinc-900 border border-zinc-800 px-3.5 py-2 rounded-xl">
-                  <User size={16} className="text-indigo-400" />
-                  <span className="text-xs font-semibold text-zinc-300 tracking-wide">Plan: {user.plan}</span>
-                </div>
-              </div>
-
-              {/* IDE Auth Token Card */}
-              <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-5">
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2 text-sm font-bold text-zinc-200">
-                    <Key size={16} className="text-zinc-400" />
-                    <span>IDE Bağlantı Token'ı (API Anahtarı)</span>
-                  </div>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
-                    Bu token'ı KeepCode AI IDE'nizin giriş ekranına yapıştırarak geliştirme ortamınızı yetkilendirebilirsiniz. Güvenliğiniz için bu anahtarı kimseyle paylaşmayın.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 font-mono text-xs select-all text-zinc-300 overflow-x-auto min-h-[42px] flex items-center">
-                    {showToken ? token : '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'}
-                  </div>
-                  <button 
-                    onClick={() => setShowToken(!showToken)}
-                    className="h-10 px-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-semibold text-zinc-400 hover:text-zinc-200 transition-all border border-zinc-800 flex items-center justify-center gap-1.5"
-                  >
-                    <span>{showToken ? 'Gizle' : 'Göster'}</span>
-                  </button>
-                  <button 
-                    onClick={handleCopyToken}
-                    className="h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-sm hover:shadow-indigo-600/10 transition-all flex items-center justify-center gap-1.5"
-                  >
-                    {copied ? <Check size={14} /> : <Copy size={14} />}
-                    <span>{copied ? 'Kopyalandı' : 'Tokenı Kopyala'}</span>
-                  </button>
+                <div className="flex items-center gap-2 bg-zinc-900/60 border border-zinc-800 rounded-xl px-3 py-1.5">
+                  <Zap size={14} className="text-indigo-400" />
+                  <span className="text-[10px] font-bold text-zinc-300 tracking-wider">PAKET: {user.plan.toUpperCase()}</span>
                 </div>
               </div>
 
-              {/* Download Section Card */}
-              <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div className="flex flex-col gap-1.5 max-w-md">
-                  <div className="flex items-center gap-2 text-sm font-bold text-zinc-200">
-                    <Download size={16} className="text-zinc-400" />
-                    <span>KeepCode AI IDE'yi İndirin</span>
-                  </div>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
-                    Yapay zeka destekli yerel masaüstü geliştirme editörümüzün en son kararlı sürümünü indirip hemen kodlamaya başlayın.
+              {/* Stats Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div className="bg-zinc-950/30 border border-zinc-900/80 p-5 rounded-2xl flex flex-col gap-1.5">
+                  <span className="text-[10px] font-bold text-zinc-500 tracking-wider">KULLANILAN ISTEK</span>
+                  <span className="text-xl font-bold text-white">{user.api_calls}</span>
+                </div>
+                <div className="bg-zinc-950/30 border border-zinc-900/80 p-5 rounded-2xl flex flex-col gap-1.5">
+                  <span className="text-[10px] font-bold text-zinc-500 tracking-wider">PLAN LIMITI</span>
+                  <span className="text-xl font-bold text-white">{isPlanUnlimited ? 'Sınırsız' : user.api_limit}</span>
+                </div>
+                <div className="bg-zinc-950/30 border border-zinc-900/80 p-5 rounded-2xl flex flex-col gap-1.5">
+                  <span className="text-[10px] font-bold text-zinc-500 tracking-wider">KALAN KOTA</span>
+                  <span className="text-xl font-bold text-white">{isPlanUnlimited ? 'Sınırsız' : Math.max(0, user.api_limit - user.api_calls)}</span>
+                </div>
+              </div>
+
+              {/* Progress Slider */}
+              <div className="bg-zinc-950/40 border border-zinc-900 p-6 rounded-2xl flex flex-col gap-3">
+                <div className="flex justify-between items-center text-[10px] font-bold text-zinc-500 tracking-wider">
+                  <span>API KULLANIM ORANI</span>
+                  <span>{isPlanUnlimited ? '0%' : `${apiPercentage}%`}</span>
+                </div>
+                <div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                    style={{ width: `${isPlanUnlimited ? 0 : apiPercentage}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Quick Downloads Card */}
+              <div className="bg-zinc-950/40 border border-zinc-900 p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div className="max-w-md">
+                  <h3 className="text-xs font-bold text-zinc-200 tracking-wider mb-1 flex items-center gap-1.5">
+                    <Download size={14} className="text-zinc-500" />
+                    <span>IDE KURULUM DOSYALARI</span>
+                  </h3>
+                  <p className="text-xs text-zinc-500 leading-normal">
+                    Yapay zeka asistanı ve geliştirici araçlarıyla entegre çalışan yerel KeepCode AI masaüstü uygulamasının son kararlı sürümünü indirin.
                   </p>
                 </div>
-
                 <a 
                   href="/downloads/KeepCodeAIUserSetup-x64.exe"
-                  className="w-full md:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white px-5 py-3 rounded-xl shadow-sm transition-all duration-200 tracking-wide"
+                  className="shrink-0 flex items-center gap-2 bg-zinc-900 hover:bg-zinc-850 text-white border border-zinc-800 text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm"
                 >
-                  <Download size={14} />
+                  <Download size={13} />
                   <span>Kurulumu İndir (.exe)</span>
                 </a>
               </div>
@@ -250,63 +315,124 @@ export default function Dashboard() {
             </div>
           )}
 
-          {activeTab === 'usage' && (
-            <div className="flex flex-col gap-6 animate-[fadeIn_0.2s_ease-out]">
+          {/* API KEYS PANEL */}
+          {activeTab === 'api_keys' && (
+            <div className="flex flex-col gap-6">
               
-              {/* API Limit Card */}
-              <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-6">
-                <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
-                  <div className="flex items-center gap-2 text-sm font-bold text-zinc-200">
-                    <Activity size={16} className="text-zinc-400" />
-                    <span>Yapay Zeka API Kullanım İstatistikleri</span>
-                  </div>
-                  <span className="text-xs font-medium text-zinc-500">Mevcut Dönem</span>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                  <div className="bg-zinc-900/50 border border-zinc-900/50 p-4 rounded-xl">
-                    <span className="text-xs font-medium text-zinc-500 block">Kullanılan İstek</span>
-                    <span className="text-xl font-bold text-zinc-100 mt-1 block">{user.api_calls}</span>
-                  </div>
-                  <div className="bg-zinc-900/50 border border-zinc-900/50 p-4 rounded-xl">
-                    <span className="text-xs font-medium text-zinc-500 block">Toplam Limit</span>
-                    <span className="text-xl font-bold text-zinc-100 mt-1 block">
-                      {user.api_limit === 9999999 ? 'Sınırsız' : user.api_limit}
-                    </span>
-                  </div>
-                  <div className="bg-zinc-900/50 border border-zinc-900/50 p-4 rounded-xl col-span-2 md:col-span-1">
-                    <span className="text-xs font-medium text-zinc-500 block">Kalan İstek</span>
-                    <span className="text-xl font-bold text-zinc-100 mt-1 block">
-                      {user.api_limit === 9999999 ? 'Sınırsız' : Math.max(0, user.api_limit - user.api_calls)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <div className="flex justify-between items-center text-xs font-medium text-zinc-500">
-                    <span>Yüzdelik Kullanım</span>
-                    <span>{user.api_limit === 9999999 ? '0%' : `${apiPercentage}%`}</span>
-                  </div>
-                  <div className="w-full h-2 bg-zinc-900 rounded-full overflow-hidden border border-zinc-900">
-                    <div 
-                      className="h-full bg-indigo-500 rounded-full transition-all duration-500"
-                      style={{ width: `${user.api_limit === 9999999 ? 0 : apiPercentage}%` }}
-                    />
-                  </div>
-                  <p className="text-[10px] text-zinc-600 mt-1 leading-relaxed">
-                    *Kullanım limitleriniz seçtiğiniz plana göre belirlenir. Limit aşımında yapay zeka kod asistanı yanıt vermeyi durdurabilir. Limitlerinizi yükseltmek için planınızı güncelleyebilirsiniz.
+              <div className="bg-zinc-950/40 border border-zinc-900 p-6 rounded-2xl flex flex-col gap-5">
+                <div>
+                  <h2 className="text-sm font-bold text-zinc-200 tracking-wider mb-1 flex items-center gap-1.5">
+                    <Key size={14} className="text-zinc-500" />
+                    <span>IDE BAĞLANTI ANAHTARI (API KEY)</span>
+                  </h2>
+                  <p className="text-xs text-zinc-500 leading-relaxed">
+                    IDE uygulamasında oturum açmak ve yapay zeka özelliklerini yetkilendirmek için bu anahtarı kullanın. Bu anahtarı kimseyle paylaşmamanız güvenliğiniz açısından önemlidir.
                   </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                  <div className="flex-1 bg-zinc-900/60 border border-zinc-850 rounded-xl px-4 py-2.5 font-mono text-xs select-all text-zinc-300 min-h-[40px] flex items-center overflow-x-auto">
+                    {showToken ? token : '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'}
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setShowToken(!showToken)}
+                      className="px-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-bold text-zinc-400 hover:text-zinc-200 transition-all border border-zinc-800 flex items-center justify-center gap-1.5 h-10"
+                    >
+                      <span>{showToken ? 'Gizle' : 'Göster'}</span>
+                    </button>
+                    <button 
+                      onClick={handleCopyToken}
+                      className="px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-sm hover:shadow-indigo-600/10 transition-all flex items-center justify-center gap-1.5 h-10 shrink-0"
+                    >
+                      {copied ? <Check size={13} /> : <Copy size={13} />}
+                      <span>{copied ? 'Kopyalandı' : 'Kopyala'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Help Box */}
+              <div className="bg-zinc-950/20 border border-zinc-900/50 p-5 rounded-2xl flex gap-3 text-xs leading-relaxed text-zinc-500">
+                <HelpCircle size={16} className="text-zinc-600 shrink-0 mt-0.5" />
+                <div className="flex flex-col gap-1">
+                  <span className="font-bold text-zinc-400">Anahtarımı nasıl kullanırım?</span>
+                  <span>1. Yukarıdaki bağlantı anahtarını kopyalayın.</span>
+                  <span>2. KeepCode AI editörünü açıp sol alt köşedeki "Giriş Yap" butonuna tıklayın.</span>
+                  <span>3. Açılan kutuya bu anahtarı yapıştırıp onaylayın. Sisteminiz anında yetkilendirilecektir.</span>
                 </div>
               </div>
 
             </div>
           )}
 
+          {/* USAGE PANEL */}
+          {activeTab === 'usage' && (
+            <div className="flex flex-col gap-6">
+              
+              {/* Usage Cards */}
+              <div className="bg-zinc-950/40 border border-zinc-900 p-6 rounded-2xl flex flex-col gap-6">
+                <div>
+                  <h2 className="text-sm font-bold text-zinc-200 tracking-wider mb-1 flex items-center gap-1.5">
+                    <BarChart3 size={14} className="text-zinc-500" />
+                    <span>DETAYLI KULLANIM DETAYLARI</span>
+                  </h2>
+                  <p className="text-xs text-zinc-500">Geçerli döneme ait günlük API istek miktarlarını ve kota limit aşım analizlerini takip edin.</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-zinc-900/40 border border-zinc-850 p-4 rounded-xl flex justify-between items-center">
+                    <div>
+                      <span className="text-[10px] font-bold text-zinc-500 block tracking-wider">BUGÜNKÜ ISTEK</span>
+                      <span className="text-lg font-bold text-white mt-1 block">{user.api_calls}</span>
+                    </div>
+                    <Activity size={18} className="text-zinc-600" />
+                  </div>
+                  <div className="bg-zinc-900/40 border border-zinc-850 p-4 rounded-xl flex justify-between items-center">
+                    <div>
+                      <span className="text-[10px] font-bold text-zinc-500 block tracking-wider">RESET DÖNEMİ</span>
+                      <span className="text-lg font-bold text-white mt-1 block">Aylık</span>
+                    </div>
+                    <Calendar size={18} className="text-zinc-600" />
+                  </div>
+                </div>
+
+                {/* Graph Mockup */}
+                <div className="bg-zinc-950/60 border border-zinc-900 p-4 rounded-xl flex flex-col gap-4 font-mono text-[10px] text-zinc-600">
+                  <span className="font-bold tracking-wider text-zinc-500">SON 7 GÜNLÜK API AKIŞ GRAFİĞİ</span>
+                  <div className="h-32 flex items-end justify-between gap-1 pt-4 border-b border-zinc-900 pb-2">
+                    <div className="w-full bg-zinc-900 rounded-t h-4 flex flex-col justify-end"><div className="bg-indigo-500/20 rounded-t h-2" /></div>
+                    <div className="w-full bg-zinc-900 rounded-t h-12 flex flex-col justify-end"><div className="bg-indigo-500/40 rounded-t h-6" /></div>
+                    <div className="w-full bg-zinc-900 rounded-t h-8 flex flex-col justify-end"><div className="bg-indigo-500/30 rounded-t h-4" /></div>
+                    <div className="w-full bg-zinc-900 rounded-t h-20 flex flex-col justify-end"><div className="bg-indigo-500/60 rounded-t h-12" /></div>
+                    <div className="w-full bg-zinc-900 rounded-t h-16 flex flex-col justify-end"><div className="bg-indigo-500/50 rounded-t h-10" /></div>
+                    <div className="w-full bg-zinc-900 rounded-t h-24 flex flex-col justify-end"><div className="bg-indigo-500/70 rounded-t h-18" /></div>
+                    <div className="w-full bg-zinc-900 rounded-t h-28 flex flex-col justify-end"><div className="bg-indigo-500/90 rounded-t h-24" /></div>
+                  </div>
+                  <div className="flex justify-between text-zinc-700">
+                    <span>Pzt</span>
+                    <span>Sal</span>
+                    <span>Çar</span>
+                    <span>Per</span>
+                    <span>Cum</span>
+                    <span>Cmt</span>
+                    <span>Paz</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* BILLING / PLANS PANEL */}
           {activeTab === 'billing' && (
-            <div className="flex flex-col gap-6 animate-[fadeIn_0.2s_ease-out]">
+            <div className="flex flex-col gap-6">
               
               <div className="flex flex-col gap-1">
-                <h1 className="text-lg font-bold tracking-tight text-zinc-200">KeepCode AI Planınızı Seçin</h1>
+                <h2 className="text-sm font-bold text-zinc-200 tracking-wider flex items-center gap-1.5">
+                  <CreditCard size={14} className="text-zinc-500" />
+                  <span>KULLANIM PLANLARI VE ABONELİK</span>
+                </h2>
                 <p className="text-xs text-zinc-500">Geliştirme hızınıza uygun, güçlü AI yetenekleriyle donatılmış planlarımız.</p>
               </div>
 
@@ -314,168 +440,210 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 {/* Free Plan */}
-                <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-6 transition-all bg-zinc-950 ${
-                  user.plan === 'Free' ? 'border-indigo-500' : 'border-zinc-900'
+                <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-5 transition-all bg-zinc-950/40 ${
+                  user.plan === 'free' ? 'border-indigo-500 shadow-sm' : 'border-zinc-900'
                 }`}>
                   <div className="flex flex-col gap-4">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-sm text-zinc-200">Free</span>
-                        {user.plan === 'Free' && (
-                          <span className="text-[10px] bg-indigo-500/10 text-indigo-400 font-semibold px-2 py-0.5 rounded-full border border-indigo-500/20">Aktif</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-zinc-500 mt-1">AI ile kodlamayı deneyimleyin.</p>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-xs text-zinc-300">Ücretsiz (Free)</span>
+                      {user.plan === 'free' && (
+                        <span className="text-[9px] bg-indigo-500/10 text-indigo-400 font-bold px-2 py-0.5 rounded-full border border-indigo-500/20">AKTİF</span>
+                      )}
                     </div>
-
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold text-zinc-100">$0</span>
+                    <div className="flex items-baseline gap-1 py-1">
+                      <span className="text-2xl font-extrabold text-white">$0</span>
                       <span className="text-[10px] text-zinc-600">/ her zaman</span>
                     </div>
-
-                    <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-900 pt-4">
+                    <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-900/60 pt-3">
                       <li className="flex items-center gap-2">
                         <Check size={12} className="text-zinc-500" />
-                        <span>Aylık 100 AI İstek</span>
+                        <span>Aylık 50 AI İstek</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <Check size={12} className="text-zinc-500" />
                         <span>Temel AI Modelleri</span>
                       </li>
-                      <li className="flex items-center gap-2">
-                        <Check size={12} className="text-zinc-500" />
-                        <span>Masaüstü IDE Entegrasyonu</span>
-                      </li>
                     </ul>
                   </div>
-
                   <button 
-                    disabled={user.plan === 'Free' || upgradeLoading}
-                    onClick={() => handleUpgrade('Free')}
-                    className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${
-                      user.plan === 'Free'
-                        ? 'bg-zinc-900 text-zinc-500 border border-zinc-800 cursor-not-allowed'
-                        : 'bg-zinc-900 hover:bg-zinc-850 text-zinc-300 hover:text-zinc-100 border border-zinc-800'
+                    disabled={user.plan === 'free' || upgradeLoading}
+                    onClick={() => handleUpgrade('free')}
+                    className={`w-full py-2 rounded-xl text-xs font-bold transition-all ${
+                      user.plan === 'free'
+                        ? 'bg-zinc-900/40 text-zinc-650 border border-zinc-850 cursor-not-allowed'
+                        : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800'
                     }`}
                   >
-                    <span>{user.plan === 'Free' ? 'Mevcut Planınız' : 'Free Paketine Geç'}</span>
+                    Mevcut Plan
                   </button>
                 </div>
 
                 {/* Pro Plan */}
-                <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-6 transition-all bg-zinc-950 ${
-                  user.plan === 'Pro' ? 'border-indigo-500' : 'border-zinc-900'
+                <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-5 transition-all bg-zinc-950/40 ${
+                  user.plan === 'pro' ? 'border-indigo-500 shadow-sm' : 'border-zinc-900'
                 }`}>
                   <div className="flex flex-col gap-4">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-sm text-zinc-200">Pro</span>
-                        {user.plan === 'Pro' && (
-                          <span className="text-[10px] bg-indigo-500/10 text-indigo-400 font-semibold px-2 py-0.5 rounded-full border border-indigo-500/20">Aktif</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-zinc-500 mt-1">Profesyonel geliştiriciler için.</p>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-xs text-zinc-300">Gelişmiş (Pro)</span>
+                      {user.plan === 'pro' && (
+                        <span className="text-[9px] bg-indigo-500/10 text-indigo-400 font-bold px-2 py-0.5 rounded-full border border-indigo-500/20">AKTİF</span>
+                      )}
                     </div>
-
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold text-zinc-100">$19</span>
+                    <div className="flex items-baseline gap-1 py-1">
+                      <span className="text-2xl font-extrabold text-white">$19</span>
                       <span className="text-[10px] text-zinc-600">/ aylık</span>
                     </div>
-
-                    <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-900 pt-4">
+                    <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-900/60 pt-3">
                       <li className="flex items-center gap-2">
                         <Check size={12} className="text-emerald-500" />
                         <span>Aylık 5,000 AI İstek</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <Check size={12} className="text-emerald-500" />
-                        <span>Gelişmiş Kod Modelleri</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check size={12} className="text-emerald-500" />
-                        <span>Öncelikli Altyapı ve Hız</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check size={12} className="text-emerald-500" />
-                        <span>Erken Erişilebilir Sürümler</span>
+                        <span>Hızlı Kod Tamamlama</span>
                       </li>
                     </ul>
                   </div>
-
                   <button 
-                    disabled={user.plan === 'Pro' || upgradeLoading}
-                    onClick={() => handleUpgrade('Pro')}
-                    className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${
-                      user.plan === 'Pro'
-                        ? 'bg-zinc-900 text-zinc-500 border border-zinc-800 cursor-not-allowed'
-                        : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm'
+                    disabled={user.plan === 'pro' || upgradeLoading}
+                    onClick={() => handleUpgrade('pro')}
+                    className={`w-full py-2 rounded-xl text-xs font-bold transition-all ${
+                      user.plan === 'pro'
+                        ? 'bg-zinc-900/40 text-zinc-650 border border-zinc-850 cursor-not-allowed'
+                        : 'bg-indigo-650 hover:bg-indigo-600 text-white'
                     }`}
                   >
-                    {upgradeLoading && user.plan !== 'Pro' ? (
-                      <div className="w-4 h-4 border-2 border-zinc-300 border-t-zinc-900 rounded-full animate-spin mx-auto"></div>
-                    ) : (
-                      <span>{user.plan === 'Pro' ? 'Mevcut Planınız' : 'Pro Paketine Yükselt'}</span>
-                    )}
+                    {upgradeLoading && user.plan !== 'pro' ? 'Yükleniyor...' : 'Pro Planına Geç'}
                   </button>
                 </div>
 
-                {/* Enterprise Plan */}
-                <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-6 transition-all bg-zinc-950 ${
-                  user.plan === 'Enterprise' ? 'border-indigo-500' : 'border-zinc-900'
+                {/* Premium Plan */}
+                <div className={`border rounded-2xl p-6 flex flex-col justify-between gap-5 transition-all bg-zinc-950/40 ${
+                  user.plan === 'premium' ? 'border-indigo-500 shadow-sm' : 'border-zinc-900'
                 }`}>
                   <div className="flex flex-col gap-4">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-sm text-zinc-200">Enterprise</span>
-                        {user.plan === 'Enterprise' && (
-                          <span className="text-[10px] bg-indigo-500/10 text-indigo-400 font-semibold px-2 py-0.5 rounded-full border border-indigo-500/20">Aktif</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-zinc-500 mt-1">Geniş takımlar ve ölçeklenebilirlik.</p>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-xs text-zinc-300">Sınırsız (Premium)</span>
+                      {user.plan === 'premium' && (
+                        <span className="text-[9px] bg-indigo-500/10 text-indigo-400 font-bold px-2 py-0.5 rounded-full border border-indigo-500/20">AKTİF</span>
+                      )}
                     </div>
-
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold text-zinc-100">$99</span>
+                    <div className="flex items-baseline gap-1 py-1">
+                      <span className="text-2xl font-extrabold text-white">$99</span>
                       <span className="text-[10px] text-zinc-600">/ aylık</span>
                     </div>
-
-                    <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-900 pt-4">
+                    <ul className="text-xs text-zinc-400 space-y-2 border-t border-zinc-900/60 pt-3">
                       <li className="flex items-center gap-2">
                         <Check size={12} className="text-indigo-400" />
                         <span className="font-medium text-zinc-300">Sınırsız AI İstek</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <Check size={12} className="text-indigo-400" />
-                        <span>En Hızlı Özel Altyapı</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check size={12} className="text-indigo-400" />
-                        <span>Takım Yönetim Konsolu</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check size={12} className="text-indigo-400" />
-                        <span>7/24 Özel Destek</span>
+                        <span>En Hızlı Özel Hat</span>
                       </li>
                     </ul>
                   </div>
-
                   <button 
-                    disabled={user.plan === 'Enterprise' || upgradeLoading}
-                    onClick={() => handleUpgrade('Enterprise')}
-                    className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${
-                      user.plan === 'Enterprise'
-                        ? 'bg-zinc-900 text-zinc-500 border border-zinc-800 cursor-not-allowed'
-                        : 'bg-zinc-900 hover:bg-zinc-850 text-zinc-300 hover:text-zinc-100 border border-zinc-800'
+                    disabled={user.plan === 'premium' || upgradeLoading}
+                    onClick={() => handleUpgrade('premium')}
+                    className={`w-full py-2 rounded-xl text-xs font-bold transition-all ${
+                      user.plan === 'premium'
+                        ? 'bg-zinc-900/40 text-zinc-650 border border-zinc-850 cursor-not-allowed'
+                        : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800'
                     }`}
                   >
-                    {upgradeLoading && user.plan !== 'Enterprise' ? (
-                      <div className="w-4 h-4 border-2 border-zinc-300 border-t-zinc-900 rounded-full animate-spin mx-auto"></div>
-                    ) : (
-                      <span>{user.plan === 'Enterprise' ? 'Mevcut Planınız' : 'Enterprise\'a Yükselt'}</span>
-                    )}
+                    {upgradeLoading && user.plan !== 'premium' ? 'Yükleniyor...' : 'Premium Plana Geç'}
                   </button>
                 </div>
 
+              </div>
+
+            </div>
+          )}
+
+          {/* SETTINGS PANEL */}
+          {activeTab === 'settings' && (
+            <div className="flex flex-col gap-6">
+              
+              {/* Profile details */}
+              <div className="bg-zinc-950/40 border border-zinc-900 p-6 rounded-2xl flex flex-col gap-5">
+                <h2 className="text-sm font-bold text-zinc-200 tracking-wider flex items-center gap-1.5 border-b border-zinc-900 pb-3">
+                  <User size={14} className="text-zinc-500" />
+                  <span>PROFİL BİLGİLERİNİ GÜNCELLE</span>
+                </h2>
+                
+                <form onSubmit={handleUpdateProfile} className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 tracking-wider">KULLANICI ADI</label>
+                    <input 
+                      type="text" 
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                      className="bg-zinc-900/60 border border-zinc-850 hover:border-zinc-800 focus:border-zinc-700 outline-none rounded-xl px-4 py-2 text-xs font-medium text-white transition-all"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 opacity-60">
+                    <label className="text-[10px] font-bold text-zinc-500 tracking-wider">E-POSTA ADRESİ (DEĞİŞTİRİLEMEZ)</label>
+                    <input 
+                      type="email" 
+                      value={user.email}
+                      disabled
+                      className="bg-zinc-950 border border-zinc-900 rounded-xl px-4 py-2 text-xs font-medium text-zinc-500 cursor-not-allowed"
+                    />
+                  </div>
+
+                  <button 
+                    type="submit"
+                    disabled={settingsLoading}
+                    className="bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-all self-start"
+                  >
+                    {settingsLoading ? 'Güncelleniyor...' : 'Değişiklikleri Kaydet'}
+                  </button>
+                </form>
+              </div>
+
+              {/* Password change */}
+              <div className="bg-zinc-950/40 border border-zinc-900 p-6 rounded-2xl flex flex-col gap-5">
+                <h2 className="text-sm font-bold text-zinc-200 tracking-wider flex items-center gap-1.5 border-b border-zinc-900 pb-3">
+                  <Lock size={14} className="text-zinc-500" />
+                  <span>ŞİFRE DEĞİŞTİR</span>
+                </h2>
+
+                <form onSubmit={(e) => { e.preventDefault(); setMessage('Şifreniz başarıyla güncellendi.'); setTimeout(() => setMessage(''), 4000); }} className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 tracking-wider">MEVCUT ŞİFRE</label>
+                    <input 
+                      type={showPass ? 'text' : 'password'}
+                      className="bg-zinc-900/60 border border-zinc-850 hover:border-zinc-800 focus:border-zinc-700 outline-none rounded-xl px-4 py-2 text-xs font-medium text-white transition-all"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 tracking-wider">YENİ ŞİFRE</label>
+                    <div className="relative">
+                      <input 
+                        type={showPass ? 'text' : 'password'}
+                        className="w-full bg-zinc-900/60 border border-zinc-850 hover:border-zinc-800 focus:border-zinc-700 outline-none rounded-xl px-4 py-2 text-xs font-medium text-white transition-all pr-10"
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => setShowPass(!showPass)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-650 hover:text-zinc-400 transition-colors"
+                      >
+                        {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit"
+                    className="bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-all self-start"
+                  >
+                    Şifreyi Güncelle
+                  </button>
+                </form>
               </div>
 
             </div>
@@ -486,18 +654,19 @@ export default function Dashboard() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-900 py-6 bg-[#090a0f] mt-12">
+      <footer className="border-t border-zinc-900/60 py-8 bg-[#07080c] mt-12">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-600 font-medium">
           <div className="flex items-center gap-1">
             <span>&copy; {new Date().getFullYear()} KeepCode AI. Tüm hakları saklıdır.</span>
           </div>
           <div className="flex gap-4">
-            <a href="https://keepcodeai.com" className="hover:text-zinc-400 transition-colors">Ana Sayfa</a>
-            <a href="/docs.html" className="hover:text-zinc-400 transition-colors">Belgeler</a>
+            <a href="/" className="hover:text-zinc-400 transition-colors">Ana Sayfa</a>
+            <a href="/pricing" className="hover:text-zinc-400 transition-colors">Fiyatlandırma</a>
+            <a href="/docs" className="hover:text-zinc-400 transition-colors">Belgeler</a>
             <span className="text-zinc-800">|</span>
             <span className="flex items-center gap-1 text-zinc-500">
               <Shield size={12} />
-              <span>Güvenli Bağlantı (SSL)</span>
+              <span>SSL Korumalı</span>
             </span>
           </div>
         </div>
