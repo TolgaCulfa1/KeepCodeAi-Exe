@@ -306,16 +306,16 @@ app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:plat
             if (ghResponse.ok) {
                 releaseCache = await ghResponse.json();
                 
-                // Fetch tag ref to get the exact commit hash
+                // Fetch latest successful run to get the exact commit hash of the latest build
                 try {
-                    const refResponse = await fetch('https://api.github.com/repos/TolgaCulfa1/KeepCodeAi-Exe/git/ref/tags/latest', { headers });
-                    if (refResponse.ok) {
-                        const refData = await refResponse.json();
-                        latestTagSha = refData.object?.sha || '';
-                        console.log('Latest tag commit SHA fetched:', latestTagSha);
+                    const runResponse = await fetch('https://api.github.com/repos/TolgaCulfa1/KeepCodeAi-Exe/actions/runs?status=completed&conclusion=success&per_page=1', { headers });
+                    if (runResponse.ok) {
+                        const runData = await runResponse.json();
+                        latestTagSha = runData.workflow_runs?.[0]?.head_sha || '';
+                        console.log('Latest successful run commit SHA fetched:', latestTagSha);
                     }
-                } catch (refErr) {
-                    console.error('Error fetching tag ref:', refErr);
+                } catch (runErr) {
+                    console.error('Error fetching actions run SHA:', runErr);
                 }
 
                 lastCacheFetchTime = now;

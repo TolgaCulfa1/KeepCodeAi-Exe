@@ -33,6 +33,9 @@ export interface IKeepCodeAIService {
 	canUseAI(): boolean;
 }
 
+import { Registry } from '../../../../platform/registry/common/platform.js';
+import { IConfigurationRegistry, Extensions as ConfigurationExtensions } from '../../../../platform/configuration/common/configurationRegistry.js';
+
 export const IKeepCodeAIService = createDecorator<IKeepCodeAIService>('keepcodeaiService');
 
 export class KeepCodeAIService extends Disposable implements IKeepCodeAIService {
@@ -51,6 +54,27 @@ export class KeepCodeAIService extends Disposable implements IKeepCodeAIService 
 		@IConfigurationService private readonly configurationService: IConfigurationService
 	) {
 		super();
+
+		// Register configurations so writing to them is allowed
+		const registry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Configuration);
+		registry.registerConfiguration({
+			'id': 'keepcodeai',
+			'order': 20,
+			'title': 'KeepCode AI',
+			'type': 'object',
+			'properties': {
+				'keepcodeai.token': {
+					'type': 'string',
+					'description': 'KeepCode AI Token',
+					'default': ''
+				},
+				'keepcodeai.user': {
+					'type': 'object',
+					'description': 'KeepCode AI User Info',
+					'default': null
+				}
+			}
+		});
 
 		// Load saved token on startup
 		this._loadSavedToken();
