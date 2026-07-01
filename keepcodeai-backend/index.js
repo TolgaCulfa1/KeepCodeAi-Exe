@@ -14,7 +14,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'keepcode-super-secret-key-123456';
 app.use(cors());
 app.use(express.json());
 
-// Serves the static files from public directory
+// Serve static files from public directory (Frontend React dist files)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Database setup
@@ -64,6 +64,11 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
+
+// --- HEALTH CHECK ---
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', time: new Date().toISOString() });
+});
 
 // --- AUTH API ROTALARI ---
 
@@ -147,7 +152,6 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
         if (err || !user) {
             return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
         }
-        // IDE expects api_calls and api_limit for canUseAI() check
         const planLimits = { free: 50, pro: 5000, premium: 50000 };
         res.json({
             ...user,
@@ -175,12 +179,10 @@ app.post('/api/auth/upgrade', authenticateToken, (req, res) => {
 });
 
 // --- SECURE AI COMPLETIONS API PROXY ---
-
 app.post('/api/chat/completions', authenticateToken, async (req, res) => {
     try {
         const apiKey = process.env.DEEPSEEK_API_KEY || 'sk-ce616de0e52c4324b55205af422506ef';
 
-        // Forward request payload to DeepSeek API
         const dsResponse = await fetch('https://api.deepseek.com/chat/completions', {
             method: 'POST',
             headers: {
@@ -196,12 +198,10 @@ app.post('/api/chat/completions', authenticateToken, async (req, res) => {
             return res.status(dsResponse.status).send(errText);
         }
 
-        // Set streaming response headers
         res.setHeader('Content-Type', dsResponse.headers.get('Content-Type') || 'text/event-stream');
         if (dsResponse.headers.get('Cache-Control')) res.setHeader('Cache-Control', dsResponse.headers.get('Cache-Control'));
         if (dsResponse.headers.get('Connection')) res.setHeader('Connection', dsResponse.headers.get('Connection'));
 
-        // Stream the response back to VS Code Client
         const reader = dsResponse.body.getReader();
         while (true) {
             const { done, value } = await reader.read();
@@ -216,53 +216,121 @@ app.post('/api/chat/completions', authenticateToken, async (req, res) => {
     }
 });
 
-// --- AUTO UPDATER API ---
-app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:platform/:quality/:commit'], async (req, res) => {
-    const { platform, quality, commit } = req.params;
-    console.log(`Update check from platform: ${platform}, quality: ${quality}, commit: ${commit}`);
-    
-    try {
-        // Fetch the latest release from GitHub
-        const ghResponse = await fetch('https://api.github.com/repos/TolgaCulfa1/KeepCodeAi-Exe/releases/tags/latest', {
-            headers: {
-                'User-Agent': 'KeepCodeAI-Update-Server',
-                'Accept': 'application/vnd.github.v3+json'
+// --- COPILOT ENTITLEMENTS / TOKEN ENDPOINTS ---
+
+// 1. Entitlement check (GET /api/token)
+app.get('/api/token', authenticateToken, (req, res) => {
+    db.get(`SELECT plan FROM users WHERE id = ?`, [req.user.id], (err, user) => {
+        if (err || !user) {
+            return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
+        }
+        
+        const plan = user.plan || 'free';
+        res.json({
+            access_type_sku: plan === 'free' ? 'copilot_free' : 'copilot_pro',
+            chat_enabled: true,
+            assigned_date: new Date().toISOString(),
+            can_signup_for_limited: false,
+            copilot_plan: plan,
+            organization_login_list: [],
+            analytics_tracking_id: `keepcode-${req.user.id}`,
+            quota_snapshots: {
+                chat: {
+                    overage_count: 0,
+                    overage_permitted: true,
+                    percent_remaining: 100,
+                    unlimited: plan !== 'free',
+                    quota_remaining: plan === 'free' ? 50 : 5000,
+                    has_quota: true
+                },
+                completions: {
+                    overage_count: 0,
+                    overage_permitted: true,
+                    percent_remaining: 100,
+                    unlimited: plan !== 'free',
+                    quota_remaining: plan === 'free' ? 50 : 5000,
+                    has_quota: true
+                }
             }
         });
+    });
+});
 
-        if (!ghResponse.ok) {
-            console.log('GitHub API request failed, no update available.');
-            return res.status(204).end();
+// 2. Token entitlements (GET /api/v3/token)
+app.get('/api/v3/token', authenticateToken, (req, res) => {
+    // Semicolon-separated key-value pairs formatted string expected by extractFromToken() in defaultAccount.ts
+    // editor_preview_features=1;agent_mode=1;mcp=1;cloud_session_storage_enabled=1
+    const tokenPayload = 'editor_preview_features=1;agent_mode=1;mcp=1;cloud_session_storage_enabled=1:dummy-sig';
+    res.json({
+        token: tokenPayload
+    });
+});
+
+// 3. MCP Registry (GET /api/v1/mcp_registry)
+app.get('/api/v1/mcp_registry', authenticateToken, (req, res) => {
+    res.json({
+        mcp_registries: [
+            {
+                url: 'https://api.keepcodeai.com/api/v1/mcp_registry',
+                registry_access: 'allow_all'
+            }
+        ]
+    });
+});
+
+// --- AUTO UPDATER API WITH GITHUB RELEASES CACHING ---
+let releaseCache = null;
+let lastCacheFetchTime = 0;
+const CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes cache
+
+app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:platform/:quality/:commit'], async (req, res) => {
+    const { platform, quality, commit } = req.params;
+    console.log(`Update check - Platform: ${platform}, Quality: ${quality}, Commit: ${commit}`);
+    
+    try {
+        const now = Date.now();
+        if (!releaseCache || (now - lastCacheFetchTime) > CACHE_DURATION_MS) {
+            console.log('Fetching latest release from GitHub API...');
+            const ghResponse = await fetch('https://api.github.com/repos/TolgaCulfa1/KeepCodeAi-Exe/releases/tags/latest', {
+                headers: {
+                    'User-Agent': 'KeepCodeAI-Update-Server',
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+
+            if (ghResponse.ok) {
+                releaseCache = await ghResponse.json();
+                lastCacheFetchTime = now;
+            } else {
+                console.warn('GitHub API request failed, status:', ghResponse.status);
+            }
         }
 
-        const release = await ghResponse.json();
+        if (!releaseCache) {
+            console.log('No release cache available, returning 204');
+            return res.status(204).end();
+        }
         
         // Find the Windows Installer asset
-        const exeAsset = release.assets.find(a => a.name.endsWith('.exe'));
+        const exeAsset = releaseCache.assets.find(a => a.name.endsWith('.exe'));
         
         if (!exeAsset) {
-            console.log('No Windows EXE found in the latest release.');
+            console.log('No Windows EXE found in the latest release. Returning 204');
             return res.status(204).end();
         }
 
-        // Compare commit hashes if possible. If the release has the commit hash in the body or target_commitish, we can check.
-        // For simplicity, if we don't have a way to match commits exactly, we can check the published_at date or release name.
-        // Let's assume if the release was published after the user's build, it's new. But VS Code relies on the 'version' or 'name' string being different.
-        
         // Construct the update payload expected by VS Code
         const updatePayload = {
             url: exeAsset.browser_download_url,
-            name: release.name || 'Latest Update',
-            version: release.tag_name,
-            productVersion: release.tag_name,
+            name: releaseCache.name || 'Latest Update',
+            version: releaseCache.tag_name,
+            productVersion: releaseCache.tag_name,
             hash: '', 
-            timestamp: new Date(release.published_at).getTime(),
+            timestamp: new Date(releaseCache.published_at).getTime(),
             sha256hash: '', 
         };
 
-        // Note: VS Code will prompt to update if the 'version' returned here is different from its current version.
-        // If it's the same version, we should ideally return 204.
-        // For now, returning 200 OK will trigger the update if the version differs.
+        console.log('Returning update payload:', updatePayload.version);
         res.json(updatePayload);
     } catch (err) {
         console.error('Update server error:', err);
@@ -271,7 +339,7 @@ app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:plat
 });
 
 // SPA (Single Page Application) routing fallback: Serve index.html for all other routes
-app.get('/{*splat}', (req, res) => {
+app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 

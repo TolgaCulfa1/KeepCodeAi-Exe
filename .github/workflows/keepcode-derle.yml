@@ -39,6 +39,53 @@ jobs:
       - name: VS Code Paketini Derle
         run: npx gulp vscode-win32-x64-min
 
+      - name: Derleme Dogrulama - Kritik Dosyalar
+        run: |
+          $buildDir = Join-Path (Split-Path (Get-Location) -Parent) "VSCode-win32-x64"
+          Write-Host "=== Build Directory ==="
+          Write-Host $buildDir
+          
+          # product.json kontrol
+          $productJson = Get-Content (Join-Path $buildDir "resources\app\product.json") | ConvertFrom-Json
+          Write-Host "=== product.json commit: $($productJson.commit) ==="
+          Write-Host "=== product.json quality: $($productJson.quality) ==="
+          Write-Host "=== product.json version: $($productJson.version) ==="
+          
+          if (-not $productJson.commit) {
+            Write-Host "::error::product.json commit hash is empty!"
+            exit 1
+          }
+          
+          # Kritik dosyalarin varligini kontrol et
+          $criticalFiles = @(
+            "resources\app\out\main.js",
+            "resources\app\out\vs\code\electron-browser\workbench\workbench.js",
+            "resources\app\out\vs\code\electron-browser\workbench\workbench.html",
+            "resources\app\out\vs\workbench\workbench.desktop.main.js",
+            "resources\app\out\vs\workbench\workbench.desktop.main.css",
+            "resources\app\out\vs\base\parts\sandbox\electron-browser\preload.js"
+          )
+          
+          $allExist = $true
+          foreach ($file in $criticalFiles) {
+            $fullPath = Join-Path $buildDir $file
+            if (Test-Path $fullPath) {
+              $size = (Get-Item $fullPath).Length
+              Write-Host "OK: $file ($size bytes)"
+            } else {
+              Write-Host "::error::EKSIK: $file"
+              $allExist = $false
+            }
+          }
+          
+          if (-not $allExist) {
+            Write-Host "::error::Kritik dosyalar eksik! IDE acilmayacaktir."
+            exit 1
+          }
+          
+          Write-Host "=== Tum kritik dosyalar mevcut ==="
+        shell: powershell
+
       - name: Sadece Kurulum Sihirbazını Derle (Setup EXE)
         run: npx gulp vscode-win32-x64-user-setup
 

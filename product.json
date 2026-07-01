@@ -41,11 +41,41 @@
 	"reportIssueUrl": "https://github.com/microsoft/vscode/issues/new",
 	"nodejsRepository": "https://nodejs.org",
 	"urlProtocol": "keepcode-ai",
-	"updateUrl": "https://keepcodeai.com/api/update",
-	"commit": "8d2f3de83894aac271f9744e701a84f4d80dea4a",
 	"quality": "stable",
 	"agentsTelemetryAppName": "agents",
-	"webviewContentExternalBaseUrlTemplate": "https://{{uuid}}.vscode-cdn.net/insider/ef65ac1ba57f57f2a3961bfe94aa20481caca4c6/out/vs/workbench/contrib/webview/browser/pre/",
+	"updateUrl": "https://api.keepcodeai.com",
+	"defaultChatAgent": {
+		"extensionId": "KeepCode.copilot",
+		"chatExtensionId": "KeepCode.copilot-chat",
+		"chatExtensionOutputId": "copilot-chat",
+		"chatExtensionOutputExtensionStateCommand": "github.copilot.logCopilotChatState",
+		"provider": {
+			"default": {
+				"id": "keepcodeai",
+				"name": "KeepCode AI"
+			},
+			"enterprise": {
+				"id": "keepcodeai-enterprise",
+				"name": "KeepCode AI Enterprise"
+			}
+		},
+		"providerExtensionId": "KeepCode.copilot-chat",
+		"providerUriSetting": "keepcodeai.enterprise.uri",
+		"providerScopes": [
+			[]
+		],
+		"documentationUrl": "https://keepcodeai.com/docs",
+		"skusDocumentationUrl": "https://keepcodeai.com/pricing",
+		"publicCodeMatchesUrl": "https://keepcodeai.com/docs/code-matches",
+		"managePlanUrl": "https://keepcodeai.com/settings",
+		"upgradePlanUrl": "https://keepcodeai.com/pricing",
+		"signUpUrl": "https://keepcodeai.com/signup",
+		"termsStatementUrl": "https://keepcodeai.com/terms",
+		"privacyStatementUrl": "https://keepcodeai.com/privacy",
+		"entitlementUrl": "https://api.keepcodeai.com/api/token",
+		"tokenEntitlementUrl": "https://api.keepcodeai.com/api/v3/token",
+		"mcpRegistryDataUrl": "https://api.keepcodeai.com/api/v1/mcp_registry"
+	},
 	"builtInExtensions": [
 		{
 			"name": "ms-vscode.js-debug-companion",
@@ -171,57 +201,7 @@
 			"type": "light"
 		}
 	],
-	"defaultChatAgent": {
-		"extensionId": "KeepCode.copilot",
-		"chatExtensionId": "KeepCode.copilot-chat",
-		"chatExtensionOutputId": "copilot-chat",
-		"chatExtensionOutputExtensionStateCommand": "github.copilot.logCopilotChatState",
-		"provider": {
-			"default": {
-				"id": "keepcodeai",
-				"name": "KeepCode AI"
-			},
-			"enterprise": {
-				"id": "keepcodeai-enterprise",
-				"name": "KeepCode AI Enterprise"
-			},
-			"google": {
-				"id": "google",
-				"name": "Google"
-			},
-			"apple": {
-				"id": "apple",
-				"name": "Apple"
-			}
-		},
-		"providerExtensionId": "KeepCode.copilot-chat",
-		"providerUriSetting": "keepcodeai.enterprise.uri",
-		"providerScopes": [
-			[]
-		],
-		"documentationUrl": "https://keepcodeai.com/docs",
-		"skusDocumentationUrl": "https://keepcodeai.com/pricing",
-		"publicCodeMatchesUrl": "https://keepcodeai.com/docs/code-matches",
-		"managePlanUrl": "https://keepcodeai.com/settings",
-		"upgradePlanUrl": "https://keepcodeai.com/pricing",
-		"signUpUrl": "https://keepcodeai.com/signup",
-		"termsStatementUrl": "https://keepcodeai.com/terms",
-		"privacyStatementUrl": "https://keepcodeai.com/privacy",
-		"entitlementUrl": "https://api.keepcodeai.com/token",
-		"entitlementSignupLimitedUrl": "https://api.keepcodeai.com/signup_limited",
-		"tokenEntitlementUrl": "https://api.keepcodeai.com/v3/token",
-		"mcpRegistryDataUrl": "https://api.keepcodeai.com/v1/mcp_registry",
-		"chatQuotaExceededContext": "keepcodeai.chat.quotaExceeded",
-		"completionsQuotaExceededContext": "keepcodeai.completions.quotaExceeded",
-		"walkthroughCommand": "keepcodeai.chat.welcome",
-		"completionsMenuCommand": "keepcodeai.openChat",
-		"chatRefreshTokenCommand": "keepcodeai.refreshToken",
-		"generateCommitMessageCommand": "keepcodeai.git.generateCommitMessage",
-		"resolveMergeConflictsCommand": "keepcodeai.resolveMergeConflicts",
-		"completionsAdvancedSetting": "keepcodeai.advanced",
-		"completionsEnablementSetting": "keepcodeai.enable",
-		"nextEditSuggestionsSetting": "keepcodeai.nextEditSuggestions.enabled"
-	},
+
 	"extensionsGallery": {
 		"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
 		"cacheUrl": "https://vscode.blob.core.windows.net/gallery/index",
@@ -238,7 +218,6 @@
 		"ms-vscode.remote-repositories": ["contribViews"]
 	},
 	"builtInExtensionsEnabledWithAutoUpdates": [
-		"KeepCode.copilot-chat"
 	],
 	"sessionsWindowAllowedExtensions": []
 }
