@@ -291,11 +291,15 @@ app.get(['/api/update/:platform/:quality/:commit', '/api/update/api/update/:plat
         const now = Date.now();
         if (!releaseCache || (now - lastCacheFetchTime) > CACHE_DURATION_MS) {
             console.log('Fetching latest release from GitHub API...');
+            const headers = {
+                'User-Agent': 'KeepCodeAI-Update-Server',
+                'Accept': 'application/vnd.github.v3+json'
+            };
+            if (process.env.GITHUB_TOKEN) {
+                headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+            }
             const ghResponse = await fetch('https://api.github.com/repos/TolgaCulfa1/KeepCodeAi-Exe/releases/tags/latest', {
-                headers: {
-                    'User-Agent': 'KeepCodeAI-Update-Server',
-                    'Accept': 'application/vnd.github.v3+json'
-                }
+                headers
             });
 
             if (ghResponse.ok) {

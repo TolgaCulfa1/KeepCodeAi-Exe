@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: windows-2022
+    permissions:
+      contents: write
 
     env:
       VSCODE_SKIP_NODE_VERSION_CHECK: 'true'
