@@ -19,56 +19,9 @@ try {
     execSync('npm run build', { cwd: path.join(__dirname, 'keepcodeai-frontend'), stdio: 'inherit' });
     console.log("Frontend başarıyla derlendi.");
 
-    // B. Derlenen public statik dosyalarını backend public/ dizinine kopyala
-    const frontendDist = path.join(__dirname, 'keepcodeai-frontend', 'dist');
-    const backendPublic = path.join(__dirname, 'keepcodeai-backend', 'public');
-
-    console.log("Frontend build dosyaları backend public dizinine taşınıyor...");
-    try {
-        if (fs.existsSync(backendPublic)) {
-            fs.rmSync(backendPublic, { recursive: true, force: true });
-        }
-        fs.mkdirSync(backendPublic, { recursive: true });
-    } catch (e) {
-        console.warn("Public dizini temizlenirken hata oluştu (dosya kilitli olabilir), kopyalamaya devam ediliyor:", e.message);
-        if (!fs.existsSync(backendPublic)) {
-            fs.mkdirSync(backendPublic, { recursive: true });
-        }
-    }
-
-    // Node.js ile dizin kopyalama yardımcısı
-    function copyFolderRecursiveSync(source, target) {
-        let files = [];
-        const targetFolder = path.join(target, path.basename(source));
-        if (!fs.existsSync(targetFolder)) {
-            fs.mkdirSync(targetFolder);
-        }
-        if (fs.lstatSync(source).isDirectory()) {
-            files = fs.readdirSync(source);
-            files.forEach(function (file) {
-                const curSource = path.join(source, file);
-                if (fs.lstatSync(curSource).isDirectory()) {
-                    copyFolderRecursiveSync(curSource, targetFolder);
-                } else {
-                    fs.copyFileSync(curSource, path.join(targetFolder, file));
-                }
-            });
-        }
-    }
-
-    // dist içindeki tüm dosyaları backend/public altına kopyala
-    const distFiles = fs.readdirSync(frontendDist);
-    distFiles.forEach(file => {
-        const srcPath = path.join(frontendDist, file);
-        const destPath = path.join(backendPublic, file);
-        if (fs.lstatSync(srcPath).isDirectory()) {
-            fs.mkdirSync(destPath, { recursive: true });
-            copyFolderRecursiveSync(srcPath, backendPublic);
-        } else {
-            fs.copyFileSync(srcPath, destPath);
-        }
-    });
-    console.log("Kopyalama tamamlandı.");
+    // B. Vite konfigürasyonu gereği (outDir: '../keepcodeai-backend/public') build çıktıları
+    // zaten doğrudan backend public klasörüne yazılmıştır. Ek bir kopyalamaya gerek yoktur.
+    console.log("Vite build çıktıları backend public klasöründe hazır.");
 
     // C. Eski geçici zip varsa sil ve yenisini oluştur
     if (fs.existsSync(localZipPath)) {
