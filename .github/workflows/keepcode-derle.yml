@@ -98,7 +98,7 @@ jobs:
           path: .build/win32-x64/user-setup/*.exe
 
       - name: GitHub Release'e Ekle (Otomatik Güncelleyici İçin)
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         continue-on-error: true # İzin hatası verirse durmasın, üstteki adımdan indirilebilsin
         with:
           name: KeepCode AI Güncel Sürüm
